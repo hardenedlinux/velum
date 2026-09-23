@@ -18,7 +18,7 @@ covered by verify_generate.py / verify_llm_sampling.py. Everything below is
 deterministic, so the expected gap is float32 accumulation (~1e-4..1e-3, see
 verify_flow.py), not a bug.
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv``. The Python reference (flow + hift) always runs on CPU for a
 deterministic comparison; `--backend cuda` runs the C++ CLI on CUDA instead
 (needs a GPU with enough free VRAM for all three resident ggufs plus the DiT
@@ -26,7 +26,7 @@ graph — ~5.5 GiB).
 
 Usage:
     ~/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10 \
-        tests/verify_e2e.py [--cli build/larynx] [--out-dir wavs] [--text ...] [--backend cuda]
+        tests/verify_e2e.py [--cli build/velum] [--out-dir wavs] [--text ...] [--backend cuda]
 """
 
 import argparse
@@ -84,7 +84,7 @@ def load_hift_source(path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--cli", default=os.path.join(ROOT, "build", "larynx"))
+    ap.add_argument("--cli", default=os.path.join(ROOT, "build", "velum"))
     ap.add_argument("--prompt-dir", default=os.path.join(ROOT, "wavs", "flow_inputs"))
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "wavs"))
     ap.add_argument("--llm-gguf", default=os.path.join(ROOT, "build", "llm.gguf"))
@@ -136,11 +136,11 @@ def main():
     if args.backend == "cuda":
         # Let the CLI auto-select CUDA: undo the CPU-only env the Python
         # reference relies on (CUDA_VISIBLE_DEVICES set in _bootstrap, and any
-        # LARYNX_BACKEND). The Python flow/hift stay on CPU regardless.
+        # VELUM_BACKEND). The Python flow/hift stay on CPU regardless.
         env.pop("CUDA_VISIBLE_DEVICES", None)
-        env.pop("LARYNX_BACKEND", None)
+        env.pop("VELUM_BACKEND", None)
     else:
-        env["LARYNX_BACKEND"] = "cpu"
+        env["VELUM_BACKEND"] = "cpu"
     print(f"[1/4] running C++ CLI (LLM -> Flow -> HiFT):", flush=True)
     subprocess.run(cmd, check=True, env=env)
 

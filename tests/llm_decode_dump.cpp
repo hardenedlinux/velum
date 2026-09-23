@@ -9,7 +9,7 @@
 //   cache_k.{0..23}.f32   (HEAD_DIM*KV_HEADS*L floats) roped key, GGML layout
 //   cache_v.{0..23}.f32   (HEAD_DIM*KV_HEADS*L floats) raw value
 //
-// Usage: larynx_llm_decode_dump <llm.gguf> <indir> <outdir>
+// Usage: velum_llm_decode_dump <llm.gguf> <indir> <outdir>
 // Reads : <indir>/lm_input.f32  (L*896 float32; L inferred from size)
 //         <indir>/next_token.i32 (single int32 token id)
 // Writes: the files above.
@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 namespace {
 
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
   }
   std::fclose(tf);
 
-  larynx::llm::LLM llm;
+  velum::llm::LLM llm;
   if (!llm.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 // Qwen2 backbone (GGML + CUDA) with the CosyVoice3 speech_embedding / llm_decoder
 // heads. Phase 4 checkpoint 3: prefill numerical verification only.
@@ -112,4 +112,4 @@ struct GenerationResult {
   int steps = 0;                  // decode steps executed (== tokens.size() unless truncated)
 };
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

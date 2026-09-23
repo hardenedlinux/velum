@@ -2,7 +2,7 @@
 // from hift_ref.npz), runs the C++ HiFT vocoder, and dumps every per-stage tensor
 // as raw float32 for comparison against the PyTorch reference.
 //
-// Usage: larynx_hift_dump <hift.gguf> <indir> <outdir>
+// Usage: velum_hift_dump <hift.gguf> <indir> <outdir>
 // Reads : <indir>/mel.f32        (80*30 float32)
 //         <indir>/rand_ini.f32   (9     float32)
 //         <indir>/sine_waves.f32 (14400*9 float32)
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/hift/hift.h"
+#include "velum/hift/hift.h"
 
 namespace {
 
@@ -71,13 +71,13 @@ int main(int argc, char** argv) {
   if (!read_f32(indir + "/rand_ini.f32", rand_ini)) return 1;
   if (!read_f32(indir + "/sine_waves.f32", sine_waves)) return 1;
 
-  larynx::hift::HiftVocoder vocoder;
+  velum::hift::HiftVocoder vocoder;
   if (!vocoder.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;
   }
 
-  larynx::hift::HiFTDebug dbg;
+  velum::hift::HiFTDebug dbg;
   std::vector<float> audio;
   if (!vocoder.vocode(mel, rand_ini, sine_waves, audio, &dbg)) {
     std::fprintf(stderr, "vocode failed\n");

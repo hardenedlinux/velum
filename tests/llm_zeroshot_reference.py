@@ -38,13 +38,13 @@ Dumped (float32 unless noted):
   ``lm_input``             (1, L, 896)     concat of the four blocks above
 
 and the prefill replay (identical to llm_reference.py) so the same lm_input can
-be fed straight through the C++ ``larynx_llm_dump`` and cross-checked:
+be fed straight through the C++ ``velum_llm_dump`` and cross-checked:
 
   ``h{0..23}``  per-layer post-residual hidden states
   ``final_norm``  model.norm(layer23)
   ``logits``      llm_decoder(final_norm)   (1, L, 6761)
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap``.
 
 Usage:

@@ -13,7 +13,7 @@
 //   cand_count.i32       (N)       candidate count per step
 //   cand_probs.f32       (N*top_k) candidate softmax probs, padded with 0
 //
-// Usage: larynx_llm_sample_dump <indir> <outdir>
+// Usage: velum_llm_sample_dump <indir> <outdir>
 // Reads : <indir>/logits.f32  (N*6761 float32)
 //         <indir>/min_len.i32  (single int32)
 // Writes: the files above.
@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/sampling.h"
+#include "velum/llm/sampling.h"
 
 namespace {
 
@@ -109,12 +109,12 @@ int main(int argc, char** argv) {
   std::vector<int32_t> sampled((size_t)N);
   for (int i = 0; i < N; i++) {
     const float* raw = logits.data() + (size_t)i * SPEECH_VOCAB;
-    larynx::llm::log_softmax(raw, SPEECH_VOCAB, logp.data());
-    if (i < min_len) logp[larynx::llm::SPEECH_TOKEN_SIZE] = -INFINITY;
+    velum::llm::log_softmax(raw, SPEECH_VOCAB, logp.data());
+    if (i < min_len) logp[velum::llm::SPEECH_TOKEN_SIZE] = -INFINITY;
 
     std::copy(logp.begin(), logp.end(), weighted_scores.begin() + (size_t)i * SPEECH_VOCAB);
 
-    int c = larynx::llm::nucleus_candidates(logp.data(), SPEECH_VOCAB, 0.8f, TOP_K,
+    int c = velum::llm::nucleus_candidates(logp.data(), SPEECH_VOCAB, 0.8f, TOP_K,
                                             idx.data(), prob.data());
     cand_count[i] = c;
     for (int j = 0; j < c; j++) {
@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
 
     // Smoke-test the RNG draw: empty history -> no repetition -> nucleus branch,
     // so the sampled token MUST be inside the candidate set.
-    larynx::llm::SamplingParams sp;
+    velum::llm::SamplingParams sp;
     sp.seed = 0;
-    sampled[i] = larynx::llm::ras_sample(logp.data(), SPEECH_VOCAB, {}, sp);
+    sampled[i] = velum::llm::ras_sample(logp.data(), SPEECH_VOCAB, {}, sp);
   }
 
   write_f32(outdir + "/weighted_scores.f32", weighted_scores);

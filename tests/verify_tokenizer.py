@@ -3,13 +3,13 @@
 
 Loads ``tests/tokenizer_cases.bin`` (produced by tests/tokenizer_reference.py:
 text + ground-truth ids), feeds the text through the compiled
-``larynx_tokenizer_dump`` utility, and asserts every case is *identical* — this
+``velum_tokenizer_dump`` utility, and asserts every case is *identical* — this
 is a tokenizer, so there is no floating-point tolerance: any id difference in
 any position is a FAIL.
 
 Usage:
-    python3 tests/verify_tokenizer.py            # uses build/larynx_tokenizer_dump
-    LARYNX_TOKENIZER_DUMP=./build/larynx_tokenizer_dump python3 tests/verify_tokenizer.py
+    python3 tests/verify_tokenizer.py            # uses build/velum_tokenizer_dump
+    VELUM_TOKENIZER_DUMP=./build/velum_tokenizer_dump python3 tests/verify_tokenizer.py
 """
 
 import os
@@ -45,14 +45,14 @@ def read_cpp(path):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_TOKENIZER_DUMP",
-                              os.path.join(ROOT, "build", "larynx_tokenizer_dump"))
+    dump_bin = os.environ.get("VELUM_TOKENIZER_DUMP",
+                              os.path.join(ROOT, "build", "velum_tokenizer_dump"))
     data_dir = os.path.join(ROOT, "build", "tokenizer")
     cases_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               "tokenizer_cases.bin")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_tokenizer_dump not found at {dump_bin}; build it first "
+        sys.exit(f"velum_tokenizer_dump not found at {dump_bin}; build it first "
                  f"(cmake --build build)")
     if not os.path.exists(os.path.join(data_dir, "vocab.tsv")):
         sys.exit(f"tokenizer data not found in {data_dir}; run tools/export_tokenizer.py")

@@ -23,7 +23,7 @@ Binary format (little-endian)::
       uint32 text_len;  uint8 text[text_len]      (UTF-8)
       uint32 id_len;    int32 ids[id_len]
 
-Runs under the CosyVoice python3.10 env, NOT the larynx ``.venv``.
+Runs under the CosyVoice python3.10 env, NOT the velum ``.venv``.
 
 Usage:
     ~/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10 \

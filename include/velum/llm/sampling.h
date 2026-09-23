@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 // CosyVoice speech-token vocabulary: real speech tokens are [0, SPEECH_TOKEN_SIZE);
 // ids >= SPEECH_TOKEN_SIZE are the stop/fill/task/sos control tokens.
@@ -42,4 +42,4 @@ int nucleus_candidates(const float* logp, int n, float top_p, int top_k,
 int ras_sample(const float* logp, int n, const std::vector<int>& decoded_tokens,
                const SamplingParams& p);
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

@@ -8,9 +8,9 @@
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
 #include "ggml-cpu.h"
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
-namespace larynx::llm {
+namespace velum::llm {
 
 // ---------------------------------------------------------------------------
 // Qwen2 architecture constants (CosyVoice-BlankEN/config.json).
@@ -84,4 +84,4 @@ ggml_tensor* attention(ggml_context* ctx, ggml_tensor* q, ggml_tensor* k, ggml_t
 // ---------------------------------------------------------------------------
 bool load_weights(const std::string& path, ggml_backend_t backend, LLMWeights* out);
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

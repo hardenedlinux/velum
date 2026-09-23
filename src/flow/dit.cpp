@@ -3,7 +3,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace larynx::flow {
+namespace velum::flow {
 
 namespace {
 
@@ -144,4 +144,4 @@ DiTGraph build_dit(ggml_context* ctx, const FlowWeights& w, int T, int B, Tensor
   return g;
 }
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

@@ -1,11 +1,11 @@
-#include "larynx/llm/sampling.h"
+#include "velum/llm/sampling.h"
 
 #include <algorithm>
 #include <cmath>
 #include <numeric>
 #include <random>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 namespace {
 
@@ -118,4 +118,4 @@ int ras_sample(const float* logp, int n, const std::vector<int>& decoded_tokens,
   return top_ids;
 }
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

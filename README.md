@@ -1,4 +1,4 @@
-# Larynx
+# Velum
 
 A native reimplementation of the [CosyVoice3](https://github.com/QwenAudio/CosyVoice) text-to-speech pipeline with **zero
 Python at runtime**. The neural networks (LLM / Flow / HiFT) run on
@@ -16,7 +16,7 @@ This project is Human architectured and co-authored by AI.
 ## Deps in runtime
 
 ```bash
-ldd larynx
+ldd velum
     linux-vdso.so.1 (0x00007ffceb3fd000)
     libicuuc.so.74 => /lib/x86_64-linux-gnu/libicuuc.so.74 (0x00007aab5e400000)
     libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007aab66b91000)
@@ -64,7 +64,7 @@ Please contact consulting@hardenedvault.com.
 | `src/flow/` | DiT flow-matching estimator (verified) |
 | `src/hift/` | Causal HiFi-GAN vocoder (verified) |
 | `src/pipeline/` | orchestration: tokenizer → LLM → Flow → HiFT |
-| `src/cli/` | `larynx` end-to-end entry point |
+| `src/cli/` | `velum` end-to-end entry point |
 | `src/frontend/` | reserved for the deferred ONNX frontend |
 | `tools/` | offline prep: `convert_weights.py`, `export_tokenizer.py`, `gguf.py`, `gen_mel_filters.py` |
 | `tests/` | `verify_*.py` numerical checks + `export_*.py` / `extract_prompt_features.py` asset producers |
@@ -77,16 +77,16 @@ cmake -S . -B build            # enables CUDA if a toolkit is detected
 cmake --build build -j
 ```
 
-This produces `larynx` plus the `larynx_*_dump` verification utilities. CUDA is
-auto-detected: `ggml`'s CUDA backend is compiled when `LARYNX_ENABLE_CUDA=ON`
+This produces `velum` plus the `velum_*_dump` verification utilities. CUDA is
+auto-detected: `ggml`'s CUDA backend is compiled when `VELUM_ENABLE_CUDA=ON`
 (default) *and* a CUDA toolchain is found; otherwise it builds CPU-only. Both
-backends are linked into `larynx` — at runtime it picks CUDA when a device is
-present and falls back to CPU. Force the CPU backend with `LARYNX_BACKEND=cpu`
+backends are linked into `velum` — at runtime it picks CUDA when a device is
+present and falls back to CPU. Force the CPU backend with `VELUM_BACKEND=cpu`
 (used by the numerical verify scripts so they don't depend on an idle GPU).
 
 > Note: the LLM is large. `llm.gguf` is ~2.6 GB, so a CUDA run needs that much
 > free VRAM (plus the Flow graph). If `cudaMalloc` reports out-of-memory, either
-> free the GPU or prefix the run with `LARYNX_BACKEND=cpu`.
+> free the GPU or prefix the run with `VELUM_BACKEND=cpu`.
 
 ## Prepare models & assets (offline, one-time)
 
@@ -148,7 +148,7 @@ different voice.
 ## Run
 
 ```sh
-./build/larynx \
+./build/velum \
   --text "今天天气不错，我们一起去公园散步吧。" \
   --prompt-dir wavs/flow_inputs \
   --out wavs/hello.wav
@@ -161,7 +161,7 @@ Model/asset paths default to `build/llm.gguf`, `build/flow.gguf`,
 `<|endofprompt|>`. Optional dumps:
 
 ```sh
-./build/larynx --text ... --prompt-dir wavs/flow_inputs --out wavs/hello.wav \
+./build/velum --text ... --prompt-dir wavs/flow_inputs --out wavs/hello.wav \
   --seed 0 \
   --dump-tokens wavs/hello.tokens.i32 \
   --dump-mel    wavs/hello.mel.f32 \
@@ -169,7 +169,7 @@ Model/asset paths default to `build/llm.gguf`, `build/flow.gguf`,
 ```
 
 `--seed` drives the LLM sampling RNG; the speech-token sequence is stochastic,
-so different seeds (or no `--seed`) give different audio. `LARYNX_BACKEND=cpu`
+so different seeds (or no `--seed`) give different audio. `VELUM_BACKEND=cpu`
 forces CPU.
 
 ## Verify

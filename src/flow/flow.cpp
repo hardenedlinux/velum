@@ -1,12 +1,12 @@
-#include "larynx/flow/flow.h"
+#include "velum/flow/flow.h"
 
 #include "internal.h"
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
 #include <cmath>
 #include <cstring>
 
-namespace larynx::flow {
+namespace velum::flow {
 
 std::string module_name() {
   return "flow (PreLookaheadLayer + DiT x22 + CFM Euler; GGML CPU, implemented)";
@@ -307,4 +307,4 @@ bool FlowDecoder::infer(const std::vector<int32_t>& prompt_tokens,
   return infer(prompt_tokens, tokens, prompt_feat, spk_embedding, noise_z, mel, debug);
 }
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

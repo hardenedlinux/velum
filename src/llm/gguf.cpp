@@ -5,9 +5,9 @@
 
 #include "gguf.h"
 
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
-namespace larynx::llm {
+namespace velum::llm {
 
 namespace {
 
@@ -106,4 +106,4 @@ bool load_weights(const std::string& path, ggml_backend_t backend, LLMWeights* o
   return ok;
 }
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

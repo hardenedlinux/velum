@@ -9,14 +9,14 @@ CosyVoice3 `speech_embedding` / `llm_decoder` heads), in the non-vLLM
 
 | Component | Reference | Notes |
 |---|---|---|
-| `larynx::llm::LLM` | `CosyVoice3LM.inference_wrapper` (non-vLLM) | prefill → sample → KV-cache decode |
+| `velum::llm::LLM` | `CosyVoice3LM.inference_wrapper` (non-vLLM) | prefill → sample → KV-cache decode |
 | Qwen2 backbone | `cosyvoice/llm/llm.py` `Qwen2Encoder` (`forward_one_step`) | 24 layers, GQA 7:1 |
 | `Qwen2Tokenizer` | `CosyVoice3Tokenizer.encode()` | byte-level BPE, bit-exact |
 | sampling | `cosyvoice/utils/common.py` `ras_sampling` | top_p 0.8 / top_k 25, own RNG |
 
 All compute runs on the GGML backend chosen by `ggml_backend_init_best()` —
-CUDA when `LARYNX_ENABLE_CUDA=ON` and a device is present, else CPU; the
-verification scripts force `LARYNX_BACKEND=cpu` so both sides are float32 for
+CUDA when `VELUM_ENABLE_CUDA=ON` and a device is present, else CPU; the
+verification scripts force `VELUM_BACKEND=cpu` so both sides are float32 for
 the numerical comparison. On CUDA the cuBLAS math mode is pinned to
 `CUBLAS_DEFAULT_MATH` (TF32 disabled) by `patches/0001`. Weights stay F32, no
 quantization.
@@ -244,7 +244,7 @@ the tensors on the backend buffer (device memory on CUDA).
 
 ## 5. Numerical validation (Checkpoints 1–6)
 
-Both sides float32 (C++ forced to CPU via `LARYNX_BACKEND=cpu`). `max`/`mean`
+Both sides float32 (C++ forced to CPU via `VELUM_BACKEND=cpu`). `max`/`mean`
 are absolute error; `rel` is `max_abs / max|ref|` (scale-normalized).
 
 | checkpoint | what it verifies | result |
@@ -278,7 +278,7 @@ llm_decode_seq_reference,llm_sample_reference,generate_reference}.py`) and the
 
 ### CUDA backend validation (RTX 3050, compute capability 8.6)
 
-Checkpoints 3/4 re-run on the CUDA backend via `LARYNX_VERIFY_BACKEND=cuda`
+Checkpoints 3/4 re-run on the CUDA backend via `VELUM_VERIFY_BACKEND=cuda`
 (unsets the CPU override so `ggml_backend_init_best()` picks `CUDA0`). The
 vendored TF32-disable patch (ADR-0002, `CUBLAS_DEFAULT_MATH` at
 `common.cuh:1505`) is applied. Results match the CPU baseline — the GQA path
@@ -309,7 +309,7 @@ numbers confirm the patch covers the full LLM path including GQA.
 
 ## 7. Files
 
-- `include/larynx/llm/llm.h` — `LLM` (`load`/`prefill`/`decode`/`generate`),
+- `include/velum/llm/llm.h` — `LLM` (`load`/`prefill`/`decode`/`generate`),
   `LLMDebug`, `GenerationResult`.
 - `src/llm/llm.cpp` — prefill graph, decode step, KV-cache management, `generate`.
 - `src/llm/ops.cpp` — `rms_norm`, `linear`, `rope_full`, `repeat_kv`, `attention`.

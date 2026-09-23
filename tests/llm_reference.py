@@ -31,7 +31,7 @@ The final RMSNorm (``model.norm``) **is** applied — verified against the pinne
 transformers 4.51.3 ``modeling_qwen2.py``, whose ``all_hidden_states`` ends with
 ``self.norm(hidden_states)``.
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap``.
 
 Usage:
@@ -92,7 +92,7 @@ def main():
     assert not missing and not unexpected, (missing, unexpected)
     llm.eval()
 
-    # Run on CPU: the C++ side is forced to the CPU backend (LARYNX_BACKEND=cpu)
+    # Run on CPU: the C++ side is forced to the CPU backend (VELUM_BACKEND=cpu)
     # for this verify, so both sides use float32 CPU kernels (deterministic, no
     # dependence on an idle GPU).
     frontend = CosyVoiceFrontEnd(

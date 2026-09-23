@@ -8,13 +8,13 @@ non-streaming `finalize=True` path.
 
 | Component | Reference | Notes |
 |---|---|---|
-| `larynx::flow::FlowDecoder` | `CausalMaskedDiffWithDiT.inference` | token → mel |
+| `velum::flow::FlowDecoder` | `CausalMaskedDiffWithDiT.inference` | token → mel |
 | `PreLookaheadLayer` | `cosyvoice/transformer/upsample_encoder.py` | 2× Conv1d + LeakyReLU + residual |
 | `DiT` ×22 | `cosyvoice/flow/DiT/dit.py` | InputEmbedding + CausalConvPositionEmbedding + TimestepEmbedding + 22 DiTBlock + norm_out + proj_out |
 | CFM Euler solver | `cosyvoice/flow/flow_matching.py` `CausalConditionalCFM` | 10 steps, batch=2N CFG, cosine t_span |
 
 All compute runs on the GGML backend chosen by `ggml_backend_init_best()` —
-CUDA when `LARYNX_ENABLE_CUDA=ON` and a device is present, else CPU. On CUDA the
+CUDA when `VELUM_ENABLE_CUDA=ON` and a device is present, else CPU. On CUDA the
 cuBLAS math mode is pinned to `CUBLAS_DEFAULT_MATH` (TF32 tensor cores disabled)
 by `patches/0001`; see `docs/adr/0002` for why TF32 otherwise causes ~3e-2
 relative error in the F32 GEMMs. Weights stay in the graph as F32, no
@@ -159,7 +159,7 @@ biased variance, no affine, matches PyTorch), `ggml_silu`, `ggml_leaky_relu`,
 Driven by `tests/verify_flow.py`: `tests/flow_reference.py` builds the verbatim
 reference modules (inlined from the CosyVoice source — the `cosyvoice` package
 is not importable on this box), loads `flow.pt`'s state_dict, and dumps
-per-stage tensors to `flow_ref.npz`. `larynx_flow_dump` runs the C++ decoder on
+per-stage tensors to `flow_ref.npz`. `velum_flow_dump` runs the C++ decoder on
 the same inputs and dumps the same stages; `verify_flow.py` compares them.
 
 Environment: `torch 2.14.0+cpu` + `numpy` for the reference; the C++ decoder
@@ -278,7 +278,7 @@ serves a local page to A/B the WAVs.
 
 ## 6. Files
 
-- `include/larynx/flow/flow.h` — `FlowDecoder` + `FlowDebug` public API.
+- `include/velum/flow/flow.h` — `FlowDecoder` + `FlowDebug` public API.
 - `src/flow/flow.cpp` — `FlowDecoder::infer`: frontend graph (spk / token_embed
   / prelookahead / mu / cond), then the 10-step CFM Euler loop over the DiT graph.
 - `src/flow/dit.cpp` — DiT graph builder (input_embed, conv_pos_embed,

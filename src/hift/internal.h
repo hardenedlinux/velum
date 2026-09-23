@@ -8,9 +8,9 @@
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
 #include "ggml-cpu.h"
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
-namespace larynx::hift {
+namespace velum::hift {
 
 // ---------------------------------------------------------------------------
 // Architecture constants (cosyvoice3.yaml CausalHiFTGenerator + tests/hift_reference.py)
@@ -167,4 +167,4 @@ void source_stft(const std::vector<float>& f0, const std::vector<float>& rand_in
 void istft(const std::vector<float>& magnitude, const std::vector<float>& phase,
            std::vector<float>& audio_out);
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

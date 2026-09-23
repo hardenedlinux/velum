@@ -24,13 +24,13 @@ PyTorch reference flow + hift.
 It works by wrapping ``model.flow.inference`` once: the wrapper records the
 tensors the reference flow is handed (and the mel it returns), then delegates to
 the original. After the official run completes, those captured inputs are
-written to a temp dir in the exact layout ``larynx_flow_dump`` expects, the C++
+written to a temp dir in the exact layout ``velum_flow_dump`` expects, the C++
 decoder is invoked, and its ``feat.f32`` mel is fed through ``model.hift``.
 
 Usage (from anywhere):
     PYTHONPATH=... python3 tests/acceptance_wavs.py \
         --model-dir ~/Project/CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B \
-        --flow-gguf build/flow.gguf --flow-dump build/larynx_flow_dump \
+        --flow-gguf build/flow.gguf --flow-dump build/velum_flow_dump \
         --out-dir wavs
 
 All CosyVoice paths default to the repo layout under ``~/Project/CosyVoice``.
@@ -60,9 +60,9 @@ def main():
     ap = argparse.ArgumentParser(description="Generate wav_ggml.wav and wav_reference.wav from one real token stream.")
     ap.add_argument("--model-dir", default=os.path.join(COSYVOICE_DIR, "pretrained_models", "Fun-CosyVoice3-0.5B"))
     ap.add_argument("--flow-gguf", default=os.path.join(ROOT, "build", "flow.gguf"))
-    ap.add_argument("--flow-dump", default=os.path.join(ROOT, "build", "larynx_flow_dump"))
+    ap.add_argument("--flow-dump", default=os.path.join(ROOT, "build", "velum_flow_dump"))
     ap.add_argument("--hift-gguf", default=os.path.join(ROOT, "build", "hift.gguf"))
-    ap.add_argument("--hift-dump", default=os.path.join(ROOT, "build", "larynx_hift_dump"))
+    ap.add_argument("--hift-dump", default=os.path.join(ROOT, "build", "velum_hift_dump"))
     ap.add_argument("--prompt-wav", default=os.path.join(COSYVOICE_DIR, "asset", "zero_shot_prompt.wav"))
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "wavs"))
     ap.add_argument("--text", default="今天天气不错，我们一起去公园散步吧。")

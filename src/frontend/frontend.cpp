@@ -1,9 +1,9 @@
-#include "larynx/frontend/frontend.h"
+#include "velum/frontend/frontend.h"
 
-namespace larynx::frontend {
+namespace velum::frontend {
 
 std::string module_name() {
   return "frontend (ONNX Runtime; shell — not implemented in Phase 1)";
 }
 
-}  // namespace larynx::frontend
+}  // namespace velum::frontend

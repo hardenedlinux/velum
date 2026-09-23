@@ -27,7 +27,7 @@ The third buffer is exported for completeness but is provably *not* on the
 ``finalize`` inference path: ``m_source.forward`` returns it as the discarded
 ``noise`` output (``inference`` does ``s, _, _ = self.m_source(s)``).
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap``.
 
 Usage:

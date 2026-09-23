@@ -3,7 +3,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace larynx::hift {
+namespace velum::hift {
 
 namespace {
 
@@ -239,4 +239,4 @@ void istft(const std::vector<float>& magnitude, const std::vector<float>& phase,
   }
 }
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

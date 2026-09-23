@@ -2,7 +2,7 @@
 """Numerical verification of the C++ CosyVoice3 LLM **sampling policy**.
 
 Compares the deterministic core of ``ras_sampling`` — the ``nucleus_sampling``
-candidate set — between the C++ (larynx_llm_sample_dump) and the PyTorch
+candidate set — between the C++ (velum_llm_sample_dump) and the PyTorch
 reference (tests/llm_sample_reference.py), over every decode step of the
 trajectory captured in Checkpoint 5. The stochastic multinomial draw is excluded
 (the C++ uses its own RNG); what is verified here is fully deterministic:
@@ -16,7 +16,7 @@ difference is purely the (expected) RNG stream difference.
 
 Usage:
     python3 tests/verify_llm_sampling.py
-    LARYNX_LLM_SAMPLE_DUMP=./build/larynx_llm_sample_dump python3 tests/verify_llm_sampling.py
+    VELUM_LLM_SAMPLE_DUMP=./build/velum_llm_sample_dump python3 tests/verify_llm_sampling.py
 """
 
 import os
@@ -40,12 +40,12 @@ def load_raw(path, shape, dtype=np.float32):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_SAMPLE_DUMP",
-                              os.path.join(ROOT, "build", "larynx_llm_sample_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_SAMPLE_DUMP",
+                              os.path.join(ROOT, "build", "velum_llm_sample_dump"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_sample_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_sample_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_llm_sample_dump not found at {dump_bin}; build it first")
     if not os.path.exists(ref_path):
         sys.exit(f"reference not found at {ref_path}; run tests/llm_sample_reference.py first")
 

@@ -9,7 +9,7 @@ what the model actually sees, and computes the same ``min_len``/``max_len`` as
 ``inference_wrapper`` (``int(text_len * {2,20})``). The autoregressive DECODE loop
 is *not* run here: that is what the C++ does on its own (the point of the test).
 
-Runs under the CosyVoice python3.10 env, NOT the larynx ``.venv``.
+Runs under the CosyVoice python3.10 env, NOT the velum ``.venv``.
 
 Usage:
     ~/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10 \

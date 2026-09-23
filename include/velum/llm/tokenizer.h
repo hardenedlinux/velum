@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 // Byte-level BPE text tokenizer reproducing `CosyVoice3Tokenizer.encode()`
 // bit-exactly.
@@ -59,4 +59,4 @@ class Qwen2Tokenizer {
   std::vector<int32_t> bpe(const std::string& chunk) const;
 };
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

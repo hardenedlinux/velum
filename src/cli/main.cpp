@@ -1,4 +1,4 @@
-// larynx — native (zero-Python-at-runtime) CosyVoice3 TTS.
+// velum — native (zero-Python-at-runtime) CosyVoice3 TTS.
 //
 // End-to-end synthesis: text (+ prompt voice) -> PCM WAV, running the LLM,
 // Flow and HiFT decoders on GGML. The prompt's speech token, matcha mel and
@@ -12,11 +12,11 @@
 #include <string>
 #include <vector>
 
-#include "larynx/flow/flow.h"
-#include "larynx/frontend/frontend.h"
-#include "larynx/hift/hift.h"
-#include "larynx/llm/llm.h"
-#include "larynx/pipeline/pipeline.h"
+#include "velum/flow/flow.h"
+#include "velum/frontend/frontend.h"
+#include "velum/hift/hift.h"
+#include "velum/llm/llm.h"
+#include "velum/pipeline/pipeline.h"
 
 namespace {
 
@@ -165,34 +165,34 @@ int main(int argc, char** argv) {
     return 2;
   }
 
-  larynx::pipeline::PromptFeatures prompt;
+  velum::pipeline::PromptFeatures prompt;
   if (!read_i32(a.prompt_dir + "/prompt_tokens.i32", prompt.prompt_tokens) ||
       !read_f32(a.prompt_dir + "/prompt_feat.f32", prompt.prompt_feat) ||
       !read_f32(a.prompt_dir + "/spk_embedding.f32", prompt.spk_embedding)) {
-    std::fprintf(stderr, "larynx: failed to read prompt bundle in %s\n", a.prompt_dir.c_str());
+    std::fprintf(stderr, "velum: failed to read prompt bundle in %s\n", a.prompt_dir.c_str());
     return 1;
   }
   if (prompt.spk_embedding.size() != 192) {
-    std::fprintf(stderr, "larynx: spk_embedding.f32 has %zu floats, expected 192\n",
+    std::fprintf(stderr, "velum: spk_embedding.f32 has %zu floats, expected 192\n",
                  prompt.spk_embedding.size());
     return 1;
   }
 
-  larynx::pipeline::Pipeline pipe;
+  velum::pipeline::Pipeline pipe;
   if (!pipe.load(a.llm_gguf, a.flow_gguf, a.hift_gguf, a.hift_source,
                  a.flow_noise, a.tokenizer_dir)) {
-    std::fprintf(stderr, "larynx: pipeline load failed\n");
+    std::fprintf(stderr, "velum: pipeline load failed\n");
     return 1;
   }
 
-  larynx::pipeline::SynthesisResult r;
+  velum::pipeline::SynthesisResult r;
   if (!pipe.synthesize(a.instruct, a.text, prompt, a.seed, r)) {
-    std::fprintf(stderr, "larynx: synthesis failed\n");
+    std::fprintf(stderr, "velum: synthesis failed\n");
     return 1;
   }
 
   if (!write_wav(a.out_wav, r.audio, r.sample_rate)) {
-    std::fprintf(stderr, "larynx: failed to write %s\n", a.out_wav.c_str());
+    std::fprintf(stderr, "velum: failed to write %s\n", a.out_wav.c_str());
     return 1;
   }
   if (!a.dump_tokens.empty()) {
@@ -203,7 +203,7 @@ int main(int argc, char** argv) {
   if (!a.dump_audio.empty()) write_f32(a.dump_audio, r.audio);
 
   std::fprintf(stderr,
-    "larynx: wrote %s  samples=%zu (%.2f s @ %d Hz)  tokens=%zu  mel=%zu frames\n",
+    "velum: wrote %s  samples=%zu (%.2f s @ %d Hz)  tokens=%zu  mel=%zu frames\n",
     a.out_wav.c_str(), r.audio.size(), (double)r.audio.size() / r.sample_rate,
     r.sample_rate, r.tokens.size(), r.mel.size() / 80);
   return 0;

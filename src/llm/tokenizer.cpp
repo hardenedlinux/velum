@@ -1,4 +1,4 @@
-#include "larynx/llm/tokenizer.h"
+#include "velum/llm/tokenizer.h"
 
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
@@ -10,7 +10,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 namespace {
 
@@ -366,4 +366,4 @@ std::vector<int32_t> Qwen2Tokenizer::encode(const std::string& text) const {
   return out;
 }
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

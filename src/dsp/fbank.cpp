@@ -8,13 +8,13 @@
 //   frame (snip_edges) -> remove DC -> preemphasis(0.97) -> povey window ->
 //   zero-pad to 512 -> rfft -> |.|^2 -> mel filterbank -> ln(floor at eps).
 
-#include "larynx/dsp/fbank.h"
+#include "velum/dsp/fbank.h"
 
 #include <algorithm>
 #include <cmath>
 #include <vector>
 
-namespace larynx::dsp {
+namespace velum::dsp {
 namespace {
 
 constexpr double kPi = 3.14159265358979323846;
@@ -168,4 +168,4 @@ void subtract_bin_mean(std::vector<float> &feat, size_t n_frames, size_t n_bins)
   }
 }
 
-}  // namespace larynx::dsp
+}  // namespace velum::dsp

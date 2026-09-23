@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Side-by-side listening comparison for Larynx acceptance gates.
+"""Side-by-side listening comparison for Velum acceptance gates.
 
 Serves a single local web page that plays two WAV files next to each other so
 you can A/B them. Generic by design: pass any two WAV files and their real
@@ -76,7 +76,7 @@ def render_page():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Larynx — A/B listening</title>
+<title>Velum — A/B listening</title>
 <style>
   :root {{ color-scheme: dark; }}
   * {{ box-sizing: border-box; }}
@@ -119,7 +119,7 @@ def render_page():
 </style>
 </head>
 <body>
-  <h1>Larynx — A/B listening</h1>
+  <h1>Velum — A/B listening</h1>
   <div class="sub">Same input, two renders. Whatever difference you hear is
     attributable to whatever differs between these two files — check the
     paths below to know exactly what's being compared.</div>

@@ -22,7 +22,7 @@ proves the KV-cache autoregressive mechanics (absolute rope positions, causal
 mask, cache append) are bit-correct over the whole trajectory without conflating
 RNG differences, which would otherwise be impossible to compare exactly.
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap``.
 
 Usage:

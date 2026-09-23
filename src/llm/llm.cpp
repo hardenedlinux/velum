@@ -1,14 +1,14 @@
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 #include "internal.h"
-#include "larynx/backend.h"
-#include "larynx/llm/sampling.h"
+#include "velum/backend.h"
+#include "velum/llm/sampling.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstring>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 std::string module_name() {
   return "llm (Qwen2 backbone + speech_embedding/llm_decoder; GGML CPU/CUDA)";
@@ -405,4 +405,4 @@ const std::vector<float>& LLM::cache_value(int layer) const {
   return impl_->kv_v[layer];
 }
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

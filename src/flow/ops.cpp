@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace larynx::flow {
+namespace velum::flow {
 
 namespace {
 
@@ -121,4 +121,4 @@ ggml_tensor* repeat_interleave_2_ne0(ggml_context* ctx, ggml_tensor* x) {
   return ggml_reshape_3d(ctx, cont, 2 * T, C, N);             // [2T, C, N]
 }
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

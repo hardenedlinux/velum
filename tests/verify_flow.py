@@ -2,7 +2,7 @@
 """Numerical verification of the C++ Flow decoder against the PyTorch reference.
 
 Loads ``flow_ref.npz`` (produced by tests/flow_reference.py), feeds the stored
-inputs through the compiled ``larynx_flow_dump`` utility, and compares every
+inputs through the compiled ``velum_flow_dump`` utility, and compares every
 per-stage tensor the C++ decoder exposes against the PyTorch ground truth:
 
   spk, token_embed, prelookahead, mu, cond (pre-DiT stages)
@@ -17,8 +17,8 @@ expected magnitude is ~1e-4..1e-3 (see docs/DSP.md for the same analysis on the
 DSP frontend).
 
 Usage:
-    python3 tests/verify_flow.py            # uses build/larynx_flow_dump
-    LARYNX_FLOW_DUMP=./build/larynx_flow_dump python3 tests/verify_flow.py
+    python3 tests/verify_flow.py            # uses build/velum_flow_dump
+    VELUM_FLOW_DUMP=./build/velum_flow_dump python3 tests/verify_flow.py
     FLOW_GGUF=./build/flow.gguf python3 tests/verify_flow.py
 """
 
@@ -70,12 +70,12 @@ def compare(name, cpp, ref):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_FLOW_DUMP", os.path.join(ROOT, "build", "larynx_flow_dump"))
+    dump_bin = os.environ.get("VELUM_FLOW_DUMP", os.path.join(ROOT, "build", "velum_flow_dump"))
     gguf = os.environ.get("FLOW_GGUF", os.path.join(ROOT, "build", "flow.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flow_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_flow_dump not found at {dump_bin}; build it first (cmake --build build)")
+        sys.exit(f"velum_flow_dump not found at {dump_bin}; build it first (cmake --build build)")
     if not os.path.exists(gguf):
         sys.exit(f"flow.gguf not found at {gguf}; run tools/convert_weights.py --flow flow.pt --out-dir build/")
     if not os.path.exists(ref_path):

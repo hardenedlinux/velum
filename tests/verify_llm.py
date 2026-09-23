@@ -2,7 +2,7 @@
 """Numerical verification of the C++ CosyVoice3 LLM (Qwen2) prefill.
 
 Loads ``llm_ref.npz`` (produced by tests/llm_reference.py), feeds the stored
-``lm_input`` through the compiled ``larynx_llm_dump`` utility, and compares every
+``lm_input`` through the compiled ``velum_llm_dump`` utility, and compares every
 per-stage tensor the C++ backbone exposes against the PyTorch ground truth:
 
   h{0..23}       per-transformer-layer post-residual hidden states (L*896 each)
@@ -15,8 +15,8 @@ layer's ~1e-7 relative error compounds to ~1e-4..1e-3 at the output; the final
 logits (6761-way) accumulate a little more. Tolerances are graded accordingly.
 
 Usage:
-    python3 tests/verify_llm.py            # uses build/larynx_llm_dump
-    LARYNX_LLM_DUMP=./build/larynx_llm_dump python3 tests/verify_llm.py
+    python3 tests/verify_llm.py            # uses build/velum_llm_dump
+    VELUM_LLM_DUMP=./build/velum_llm_dump python3 tests/verify_llm.py
     LLM_GGUF=./build/llm.gguf python3 tests/verify_llm.py
 """
 
@@ -61,12 +61,12 @@ def compare(name, cpp, ref):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_DUMP", os.path.join(ROOT, "build", "larynx_llm_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_DUMP", os.path.join(ROOT, "build", "velum_llm_dump"))
     gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_dump not found at {dump_bin}; build it first (cmake --build build)")
+        sys.exit(f"velum_llm_dump not found at {dump_bin}; build it first (cmake --build build)")
     if not os.path.exists(gguf):
         sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
     if not os.path.exists(ref_path):
@@ -86,13 +86,13 @@ def main():
 
         ref["lm_input"].astype(np.float32).reshape(-1).tofile(os.path.join(indir, "lm_input.f32"))
 
-        # Default: force CPU (deterministic ctest). LARYNX_VERIFY_BACKEND=cuda
-        # unsets LARYNX_BACKEND so the dump picks ggml_backend_init_best (CUDA).
+        # Default: force CPU (deterministic ctest). VELUM_VERIFY_BACKEND=cuda
+        # unsets VELUM_BACKEND so the dump picks ggml_backend_init_best (CUDA).
         env = dict(os.environ)
-        if os.environ.get("LARYNX_VERIFY_BACKEND") == "cuda":
-            env.pop("LARYNX_BACKEND", None)
+        if os.environ.get("VELUM_VERIFY_BACKEND") == "cuda":
+            env.pop("VELUM_BACKEND", None)
         else:
-            env["LARYNX_BACKEND"] = "cpu"
+            env["VELUM_BACKEND"] = "cpu"
         subprocess.run([dump_bin, gguf, indir, outdir], check=True, env=env)
 
         rows = []

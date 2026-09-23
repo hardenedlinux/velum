@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace larynx::flow {
+namespace velum::flow {
 
 // TimestepEmbedding: SinusPositionEmbedding(256, scale=1000) + 2-layer MLP.
 // Computed on the host in float32 (matching the reference) so the DiT graph
@@ -41,4 +41,4 @@ std::vector<float> time_embed_host(float t, const TimeMlpHost& mlp) {
   return out;
 }
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

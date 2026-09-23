@@ -1,13 +1,13 @@
-#include "larynx/hift/hift.h"
+#include "velum/hift/hift.h"
 
 #include "internal.h"
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 
-namespace larynx::hift {
+namespace velum::hift {
 
 std::string module_name() {
   return "hift (CausalHiFTGenerator: f0/SineGen2 + upsample/resblock net + ISTFT; GGML CPU, implemented)";
@@ -330,4 +330,4 @@ bool HiftVocoder::vocode(const std::vector<float>& mel, std::vector<float>& audi
   return vocode(mel, impl_->rand_ini, sw, audio, debug);
 }
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

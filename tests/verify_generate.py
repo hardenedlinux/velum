@@ -2,7 +2,7 @@
 """Verify the C++ LLM's **fully autonomous** generation loop (Checkpoint 6).
 
 Unlike verify_llm_decode_seq.py (which injects a captured token trajectory and
-compares per-step logits), this test drives ``larynx_llm_generate_dump`` end to
+compares per-step logits), this test drives ``velum_llm_generate_dump`` end to
 end: for each real text, the C++ prefill is seeded from the reference-built
 ``lm_input``, then the C++ samples its own tokens with its own RNG, feeds them
 back into its own KV cache, and stops on its own when a stop token is drawn (or
@@ -20,11 +20,11 @@ min_len" or "never stops, always hard-truncated" anomaly. (``ignore_eos`` masks
 only slot 6561, so a stop *can* still occur slightly before min_len via one of
 the other 199 control tokens — reported honestly, not silently passed.)
 
-Runs under the larynx .venv (numpy only). Reads tests/generate_inputs.npz.
+Runs under the velum .venv (numpy only). Reads tests/generate_inputs.npz.
 
 Usage:
     python3 tests/verify_generate.py
-    LARYNX_LLM_GENERATE_DUMP=./build/larynx_llm_generate_dump python3 tests/verify_generate.py
+    VELUM_LLM_GENERATE_DUMP=./build/velum_llm_generate_dump python3 tests/verify_generate.py
 """
 
 import os
@@ -47,14 +47,14 @@ def load_i32(path, n):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_GENERATE_DUMP",
-                              os.path.join(ROOT, "build", "larynx_llm_generate_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_GENERATE_DUMP",
+                              os.path.join(ROOT, "build", "velum_llm_generate_dump"))
     gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "generate_inputs.npz")
     seeds = [int(s) for s in os.environ.get("SEEDS", "0,1").split(",") if s.strip() != ""]
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_generate_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_llm_generate_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
         sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
     if not os.path.exists(ref_path):
@@ -90,7 +90,7 @@ def main():
                 np.asarray([seed], dtype=np.int32).tofile(os.path.join(indir, "seed.i32"))
 
                 subprocess.run([dump_bin, gguf, indir, outdir], check=True,
-                               env={**os.environ, "LARYNX_BACKEND": "cpu"})
+                               env={**os.environ, "VELUM_BACKEND": "cpu"})
 
                 steps = int(load_i32(os.path.join(outdir, "steps.i32"), 1)[0])
                 stop = int(load_i32(os.path.join(outdir, "stop_token.i32"), 1)[0])

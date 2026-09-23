@@ -3,7 +3,7 @@
 
 Feeds the token ids captured by tests/llm_zeroshot_reference.py (the concatenated
 ``text_tokens_all`` = prompt_text||text, plus ``prompt_speech_token``) through the
-compiled ``larynx_llm_build_dump`` utility, which runs ``LLM::build_lm_input``, and
+compiled ``velum_llm_build_dump`` utility, which runs ``LLM::build_lm_input``, and
 compares the result against the PyTorch reference embedding sequence:
 
   lm_input                  (1, L, 896)  [sos; text_emb; task_id; prompt_speech]
@@ -20,7 +20,7 @@ row, or wrong concat order), not accumulation noise.
 
 Usage:
     python3 tests/verify_llm_build.py
-    LARYNX_LLM_BUILD_DUMP=./build/larynx_llm_build_dump python3 tests/verify_llm_build.py
+    VELUM_LLM_BUILD_DUMP=./build/velum_llm_build_dump python3 tests/verify_llm_build.py
 """
 
 import os
@@ -50,13 +50,13 @@ def compare(name, cpp, ref):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_BUILD_DUMP",
-                              os.path.join(ROOT, "build", "larynx_llm_build_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_BUILD_DUMP",
+                              os.path.join(ROOT, "build", "velum_llm_build_dump"))
     gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_zeroshot_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_build_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_llm_build_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
         sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
     if not os.path.exists(ref_path):
@@ -82,10 +82,10 @@ def main():
         prompt_speech_token.astype(np.int32).reshape(-1).tofile(os.path.join(indir, "prompt_speech_token.i32"))
 
         env = dict(os.environ)
-        if os.environ.get("LARYNX_VERIFY_BACKEND") == "cuda":
-            env.pop("LARYNX_BACKEND", None)
+        if os.environ.get("VELUM_VERIFY_BACKEND") == "cuda":
+            env.pop("VELUM_BACKEND", None)
         else:
-            env["LARYNX_BACKEND"] = "cpu"
+            env["VELUM_BACKEND"] = "cpu"
         subprocess.run([dump_bin, gguf, indir, outdir], check=True, env=env)
 
         # Each reference component is a slice of lm_input; compare all four plus

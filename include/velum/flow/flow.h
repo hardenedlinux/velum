@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace larynx::flow {
+namespace velum::flow {
 
 // Human-readable module banner for the CLI (Phase 2: implemented).
 std::string module_name();
@@ -81,4 +81,4 @@ class FlowDecoder {
   Impl* impl_;
 };
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

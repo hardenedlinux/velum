@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace larynx::llm {
+namespace velum::llm {
 
 ggml_tensor* rms_norm(ggml_context* ctx, ggml_tensor* x, ggml_tensor* w) {
   ggml_tensor* n = ggml_rms_norm(ctx, x, RMS_EPS);          // [D, T, B]
@@ -64,4 +64,4 @@ ggml_tensor* attention(ggml_context* ctx, ggml_tensor* q, ggml_tensor* k, ggml_t
   return ggml_reshape_3d(ctx, o, HIDDEN, T, B);  // [HIDDEN, T, B]
 }
 
-}  // namespace larynx::llm
+}  // namespace velum::llm

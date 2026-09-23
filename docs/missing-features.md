@@ -1,8 +1,8 @@
 # Missing features vs. upstream CosyVoice3
 
-This document records the functional gaps between Larynx and the upstream
+This document records the functional gaps between Velum and the upstream
 [CosyVoice3](https://github.com/QwenAudio/CosyVoice) reference. It is a parity
-checklist: what the reference pipeline does at runtime that Larynx does not yet
+checklist: what the reference pipeline does at runtime that Velum does not yet
 cover.
 
 The gaps fall into four buckets — text frontend, acoustic frontend, inference
@@ -10,7 +10,7 @@ modes, and runtime capabilities — plus two items that are *not* functional gap
 but implementation-route differences (acceleration backend) or deployment
 surfaces.
 
-| Category | Missing feature | Upstream CosyVoice3 | Larynx status |
+| Category | Missing feature | Upstream CosyVoice3 | Velum status |
 |---|---|---|---|
 | Text frontend | `text_normalize` (digit / date / punctuation / polyphone normalization; ttsfrd or WeText) | normalizes `tts_text` and `prompt_text` before every inference | Not implemented; tokenizes raw text. Fine for plain text, diverges from the reference on digits / English / dates. |
 | Acoustic frontend | campplus speaker embedding + speech_tokenizer_v3 (ONNX) | runs the ONNX models at inference time | Deferred; pre-extracted by Python into `spk_embedding.f32` / `prompt_tokens.i32` |

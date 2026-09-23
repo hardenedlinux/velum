@@ -3,7 +3,7 @@
 
 Loads ``llm_decode_seq_ref.npz`` (produced by tests/llm_decode_seq_reference.py),
 feeds the stored ``lm_input`` + sampled ``tokens`` through the compiled
-``larynx_llm_decode_seq_dump`` utility, and compares the per-step ``llm_decoder``
+``velum_llm_decode_seq_dump`` utility, and compares the per-step ``llm_decoder``
 logits.
 
 The C++ does NOT re-implement the sampling RNG: it injects the reference's token
@@ -13,11 +13,11 @@ autoregressive mechanics (absolute rope positions, causal mask, cache append)
 are bit-correct over the whole trajectory. Any KV-layout, position-id, or
 cache-append bug shows up as an O(1) error at the first step that follows it.
 
-Both sides run float32 (C++ forced to CPU via LARYNX_BACKEND=cpu).
+Both sides run float32 (C++ forced to CPU via VELUM_BACKEND=cpu).
 
 Usage:
     python3 tests/verify_llm_decode_seq.py
-    LARYNX_LLM_DECODE_SEQ_DUMP=./build/larynx_llm_decode_seq_dump python3 tests/verify_llm_decode_seq.py
+    VELUM_LLM_DECODE_SEQ_DUMP=./build/velum_llm_decode_seq_dump python3 tests/verify_llm_decode_seq.py
 """
 
 import os
@@ -40,13 +40,13 @@ def load_raw(path, shape):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_DECODE_SEQ_DUMP",
-                              os.path.join(ROOT, "build", "larynx_llm_decode_seq_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_DECODE_SEQ_DUMP",
+                              os.path.join(ROOT, "build", "velum_llm_decode_seq_dump"))
     gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_decode_seq_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_decode_seq_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_llm_decode_seq_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
         sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
     if not os.path.exists(ref_path):
@@ -74,7 +74,7 @@ def main():
         tokens.astype(np.int32).tofile(os.path.join(indir, "tokens.i32"))
 
         subprocess.run([dump_bin, gguf, indir, outdir], check=True,
-                       env={**os.environ, "LARYNX_BACKEND": "cpu"})
+                       env={**os.environ, "VELUM_BACKEND": "cpu"})
 
         cpp_logits = load_raw(os.path.join(outdir, "seq_logits.f32"), (N, SPEECH_VOCAB))
 

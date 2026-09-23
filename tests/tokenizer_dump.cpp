@@ -3,14 +3,14 @@
 // tests/verify_tokenizer.py can compare them bit-for-bit against the Python
 // CosyVoice3Tokenizer ground truth.
 //
-// Usage: larynx_tokenizer_dump <data_dir> <cases.bin> <out.bin>
+// Usage: velum_tokenizer_dump <data_dir> <cases.bin> <out.bin>
 
 #include <cstdint>
 #include <cstdio>
 #include <string>
 #include <vector>
 
-#include "larynx/llm/tokenizer.h"
+#include "velum/llm/tokenizer.h"
 
 namespace {
 
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   const std::string cases_path = argv[2];
   const std::string out_path = argv[3];
 
-  larynx::llm::Qwen2Tokenizer tok;
+  velum::llm::Qwen2Tokenizer tok;
   if (!tok.load(data_dir)) {
     std::fprintf(stderr, "failed to load tokenizer data from %s\n", data_dir.c_str());
     return 1;

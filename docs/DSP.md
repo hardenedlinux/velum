@@ -5,8 +5,8 @@ needs before any network runs:
 
 | Function | Reference | Shape |
 |---|---|---|
-| `larynx::dsp::log_mel_spectrogram` | `whisper.log_mel_spectrogram(speech, n_mels=128)` | `(128, n/160)` |
-| `larynx::dsp::fbank` | `torchaudio.compliance.kaldi.fbank(speech, num_mel_bins=80, dither=0, sample_frequency=16000)` | `(1+(n-400)/160, 80)` |
+| `velum::dsp::log_mel_spectrogram` | `whisper.log_mel_spectrogram(speech, n_mels=128)` | `(128, n/160)` |
+| `velum::dsp::fbank` | `torchaudio.compliance.kaldi.fbank(speech, num_mel_bins=80, dither=0, sample_frequency=16000)` | `(1+(n-400)/160, 80)` |
 
 Both are pure C++ (no framework, no GPU). All arithmetic is accumulated in
 `double` and rounded to `float32` at the boundary, so the C++ is *more*
@@ -82,7 +82,7 @@ matching the CosyVoice/Campplus frontend `feat - feat.mean(dim=0, keepdim=True)`
 ## 3. Numerical validation
 
 Driven by `tests/verify_dsp.py`, which writes float32 PCM, runs the compiled
-`larynx_dump` utility, and compares against the Python references. Environment:
+`velum_dump` utility, and compares against the Python references. Environment:
 `whisper 20250625`, `torch 2.14.0+cpu`, `torchaudio 2.11.0+cpu`, CPU-only, fixed
 seed 12345. `max`/`mean` are absolute error over the whole feature tensor.
 

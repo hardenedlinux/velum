@@ -5,9 +5,9 @@
 
 #include "gguf.h"
 
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
-namespace larynx::hift {
+namespace velum::hift {
 
 namespace {
 
@@ -157,4 +157,4 @@ bool load_weights(const std::string& path, ggml_backend_t backend, HiFTWeights* 
   return ok;
 }
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

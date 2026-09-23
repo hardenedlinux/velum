@@ -3,7 +3,7 @@
 
 Loads ``llm_decode_ref.npz`` (produced by tests/llm_decode_reference.py), feeds
 the stored ``lm_input`` + ``next_token`` through the compiled
-``larynx_llm_decode_dump`` utility, and compares:
+``velum_llm_decode_dump`` utility, and compares:
 
   cache_k_{0..23}   prefill past_key_values key   (ROPED;   (KV_HEADS, L, HEAD_DIM))
   cache_v_{0..23}   prefill past_key_values value (raw;     (KV_HEADS, L, HEAD_DIM))
@@ -15,11 +15,11 @@ stores the rope'd key / raw value in the same layout transformers caches, and
 that the decode step's single new key uses the correct absolute position
 (cache_len). Any KV-layout or RoPE-position bug shows up here as an O(1) error.
 
-Both sides run float32 (C++ forced to CPU via LARYNX_BACKEND=cpu).
+Both sides run float32 (C++ forced to CPU via VELUM_BACKEND=cpu).
 
 Usage:
     python3 tests/verify_llm_decode.py
-    LARYNX_LLM_DECODE_DUMP=./build/larynx_llm_decode_dump python3 tests/verify_llm_decode.py
+    VELUM_LLM_DECODE_DUMP=./build/velum_llm_decode_dump python3 tests/verify_llm_decode.py
 """
 
 import os
@@ -56,13 +56,13 @@ def compare(name, cpp, ref):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_LLM_DECODE_DUMP",
-                              os.path.join(ROOT, "build", "larynx_llm_decode_dump"))
+    dump_bin = os.environ.get("VELUM_LLM_DECODE_DUMP",
+                              os.path.join(ROOT, "build", "velum_llm_decode_dump"))
     gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_decode_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_llm_decode_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_llm_decode_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
         sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
     if not os.path.exists(ref_path):
@@ -83,13 +83,13 @@ def main():
         ref["lm_input"].astype(np.float32).reshape(-1).tofile(os.path.join(indir, "lm_input.f32"))
         np.asarray(ref["next_token"], dtype=np.int32).tofile(os.path.join(indir, "next_token.i32"))
 
-        # Default: force CPU (deterministic ctest). LARYNX_VERIFY_BACKEND=cuda
-        # unsets LARYNX_BACKEND so the dump picks ggml_backend_init_best (CUDA).
+        # Default: force CPU (deterministic ctest). VELUM_VERIFY_BACKEND=cuda
+        # unsets VELUM_BACKEND so the dump picks ggml_backend_init_best (CUDA).
         env = dict(os.environ)
-        if os.environ.get("LARYNX_VERIFY_BACKEND") == "cuda":
-            env.pop("LARYNX_BACKEND", None)
+        if os.environ.get("VELUM_VERIFY_BACKEND") == "cuda":
+            env.pop("VELUM_BACKEND", None)
         else:
-            env["LARYNX_BACKEND"] = "cpu"
+            env["VELUM_BACKEND"] = "cpu"
         subprocess.run([dump_bin, gguf, indir, outdir], check=True, env=env)
 
         rows = []

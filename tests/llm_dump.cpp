@@ -3,7 +3,7 @@
 // hidden states, the final RMSNorm output, and the llm_decoder logits as raw
 // float32 for comparison against the PyTorch reference.
 //
-// Usage: larynx_llm_dump <llm.gguf> <indir> <outdir>
+// Usage: velum_llm_dump <llm.gguf> <indir> <outdir>
 // Reads : <indir>/lm_input.f32  (L*896 float32; L inferred from size)
 // Writes: <outdir>/hidden_states.{0..23}.f32  (each L*896 float32)
 //         <outdir>/final_norm.f32             (L*896 float32)
@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 namespace {
 
@@ -74,13 +74,13 @@ int main(int argc, char** argv) {
   }
   const int L = (int)(lm_input.size() / HIDDEN);
 
-  larynx::llm::LLM llm;
+  velum::llm::LLM llm;
   if (!llm.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;
   }
 
-  larynx::llm::LLMDebug dbg;
+  velum::llm::LLMDebug dbg;
   if (!llm.prefill(lm_input, L, &dbg)) {
     std::fprintf(stderr, "prefill failed\n");
     return 1;

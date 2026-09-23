@@ -80,7 +80,7 @@ debugging time was spent:
   material (they document real, confirmed source-level facts about
   CosyVoice3  architecture, tensor shapes, batch/CFG semantics  that
   remain valid regardless of runtime choice). They are not part of the
-  Larynx build.
+  Velum build.
 - The LLM backbone's custom heads (`speech_embedding`, `llm_decoder`) rule
   out llama.cpp as a shortcut (see main ARCHITECTURE.md 1); GGML is used
   directly.

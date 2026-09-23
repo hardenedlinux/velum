@@ -17,7 +17,7 @@ tests/verify_hift.py; the two checks here complete the production path.
 
 Usage:
     python3 tests/verify_hift_source.py
-    LARYNX_HIFT_SOURCE_DUMP=./build/larynx_hift_source_dump python3 tests/verify_hift_source.py
+    VELUM_HIFT_SOURCE_DUMP=./build/velum_hift_source_dump python3 tests/verify_hift_source.py
 """
 
 import os
@@ -59,14 +59,14 @@ def read_source_bin(path):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_HIFT_SOURCE_DUMP",
-                              os.path.join(ROOT, "build", "larynx_hift_source_dump"))
+    dump_bin = os.environ.get("VELUM_HIFT_SOURCE_DUMP",
+                              os.path.join(ROOT, "build", "velum_hift_source_dump"))
     gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "build", "hift.gguf"))
     source_bin = os.environ.get("HIFT_SOURCE_BIN",
                                 os.path.join(ROOT, "build", "hift_source.bin"))
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_hift_source_dump not found at {dump_bin}; build it first")
+        sys.exit(f"velum_hift_source_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
         sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir build/")
     if not os.path.exists(source_bin):
@@ -90,7 +90,7 @@ def main():
             .tofile(os.path.join(indir, "mel.f32"))
 
         env = dict(os.environ)
-        env["LARYNX_BACKEND"] = "cpu"
+        env["VELUM_BACKEND"] = "cpu"
         subprocess.run([dump_bin, gguf, source_bin, indir, outdir], check=True, env=env)
 
         got_rand_ini = load_raw(os.path.join(outdir, "rand_ini.f32"), (HARMONIC_DIM,))

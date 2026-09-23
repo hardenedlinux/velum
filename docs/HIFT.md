@@ -8,7 +8,7 @@ non-streaming `finalize=True` path.
 
 | Component | Reference | Notes |
 |---|---|---|
-| `larynx::hift::HiftVocoder` | `CausalHiFTGenerator.inference` | mel → PCM |
+| `velum::hift::HiftVocoder` | `CausalHiFTGenerator.inference` | mel → PCM |
 | f0 predictor | `cosyvoice/hifigan/f0_predictor.py` `CausalConvRNNF0Predictor` | float64, on host |
 | source excitation | `generator.py` `SineGen2` + `SourceModuleHnNSF` | fixed buffers, on host |
 | STFT / ISTFT | `generator.py` `_stft` / `_istft` | n_fft=16, hop=4, on host |
@@ -16,7 +16,7 @@ non-streaming `finalize=True` path.
 
 The conv network (conv_pre + the three upsample/resblock stages + conv_post)
 runs as one GGML graph on the backend chosen by `ggml_backend_init_best()` (CUDA
-when `LARYNX_ENABLE_CUDA=ON` and a device is present, else CPU); the f0
+when `VELUM_ENABLE_CUDA=ON` and a device is present, else CPU); the f0
 predictor, SineGen2, and the 16-point STFT/ISTFT run on the host (they are tiny
 and, in the case of f0, run in float64 to match PyTorch). On CUDA the cuBLAS
 math mode is pinned to `CUBLAS_DEFAULT_MATH` (TF32 disabled) via `patches/0001`;
@@ -179,7 +179,7 @@ Driven by `tests/verify_hift.py`: `tests/hift_reference.py` builds the real
 CosyVoice python3.10 env), loads `hift.pt`, and dumps per-stage tensors to
 `hift_ref.npz` (replaying `inference(finalize=True)` step-by-step, then
 cross-checking the replay against a direct `model.inference()` call).
-`larynx_hift_dump` runs the C++ vocoder on the same inputs and dumps the same
+`velum_hift_dump` runs the C++ vocoder on the same inputs and dumps the same
 stages; `verify_hift.py` compares them.
 
 Validation case: `mel` `(1,80,30)` (seed 1234) → `f0` `(1,30)` → source
@@ -289,7 +289,7 @@ invoking the C++ decoders, keeping only the HiFT.
 
 ## 6. Files
 
-- `include/larynx/hift/hift.h` — `HiftVocoder` + `HiFTDebug` public API.
+- `include/velum/hift/hift.h` — `HiftVocoder` + `HiFTDebug` public API.
 - `src/hift/hift.cpp` — `HiftVocoder::vocode`: host f0/source, then the GGML
   conv network (conv_pre → 3 upsample/resblock stages → conv_post) → ISTFT.
 - `src/hift/ops.cpp` — `conv1d_f32`, `snake`, `nearest_upsample`, `pad_zeros`,

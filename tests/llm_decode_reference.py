@@ -25,7 +25,7 @@ dropped, shape ``(KV_HEADS, seq, HEAD_DIM)`` = ``(2, 36, 64)``):
   ``cache_k_{i}``       (2, L, 64)    past_key_values key   per layer 0..23
   ``cache_v_{i}``       (2, L, 64)    past_key_values value per layer 0..23
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap``.
 
 Usage:

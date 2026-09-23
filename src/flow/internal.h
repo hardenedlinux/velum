@@ -8,9 +8,9 @@
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
 #include "ggml-cpu.h"
-#include "larynx/backend.h"
+#include "velum/backend.h"
 
-namespace larynx::flow {
+namespace velum::flow {
 
 // ---------------------------------------------------------------------------
 // Architecture constants (cosyvoice3.yaml + tests/flow_reference.py)
@@ -170,4 +170,4 @@ DiTGraph build_dit(ggml_context* ctx, const FlowWeights& w, int T, int B, Tensor
 // SinusPositionEmbedding(256, scale=1000) + time_mlp, for a scalar timestep.
 std::vector<float> time_embed_host(float t, const TimeMlpHost& mlp);
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

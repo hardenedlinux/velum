@@ -3,7 +3,7 @@
 
 Loads ``hift_ref.npz`` (produced by tests/hift_reference.py), feeds the stored
 inputs (mel + the fixed SineGen2 buffers) through the compiled
-``larynx_hift_dump`` utility, and compares every per-stage tensor the C++
+``velum_hift_dump`` utility, and compares every per-stage tensor the C++
 vocoder exposes against the PyTorch ground truth:
 
   f0, sine_wavs, sine_merge, s_stft (source path)
@@ -17,8 +17,8 @@ GGML's float32 kernels against PyTorch's own float32 kernels, so that part shows
 ~1e-4..1e-3 floating-point accumulation (see docs/DSP.md for the same analysis).
 
 Usage:
-    python3 tests/verify_hift.py            # uses build/larynx_hift_dump
-    LARYNX_HIFT_DUMP=./build/larynx_hift_dump python3 tests/verify_hift.py
+    python3 tests/verify_hift.py            # uses build/velum_hift_dump
+    VELUM_HIFT_DUMP=./build/velum_hift_dump python3 tests/verify_hift.py
     HIFT_GGUF=./build/hift.gguf python3 tests/verify_hift.py
 """
 
@@ -97,12 +97,12 @@ def compare(name, cpp, ref):
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_HIFT_DUMP", os.path.join(ROOT, "build", "larynx_hift_dump"))
+    dump_bin = os.environ.get("VELUM_HIFT_DUMP", os.path.join(ROOT, "build", "velum_hift_dump"))
     gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "build", "hift.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hift_ref.npz")
 
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_hift_dump not found at {dump_bin}; build it first (cmake --build build)")
+        sys.exit(f"velum_hift_dump not found at {dump_bin}; build it first (cmake --build build)")
     if not os.path.exists(gguf):
         sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir build/")
     if not os.path.exists(ref_path):

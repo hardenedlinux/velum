@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace larynx::dsp {
+namespace velum::dsp {
 
 // Kaldi-style log filterbank (80 bins), the Campplus speaker-embedding input.
 //
@@ -26,4 +26,4 @@ std::vector<float> fbank(const float *samples, size_t n, int num_mel_bins = 80);
 // Matches `feat - feat.mean(dim=0, keepdim=True)`. Operates in place.
 void subtract_bin_mean(std::vector<float> &feat, size_t n_frames, size_t n_bins);
 
-}  // namespace larynx::dsp
+}  // namespace velum::dsp

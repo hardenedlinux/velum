@@ -3,7 +3,7 @@
 // every per-stage tensor as raw float32 for comparison against the PyTorch
 // reference.
 //
-// Usage: larynx_flow_dump <flow.gguf> <indir> <outdir>
+// Usage: velum_flow_dump <flow.gguf> <indir> <outdir>
 // Reads : <indir>/prompt_tokens.i32 (4 x int32)
 //         <indir>/tokens.i32        (8 x int32)
 //         <indir>/prompt_feat.f32   (8*80 float32)
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/flow/flow.h"
+#include "velum/flow/flow.h"
 
 namespace {
 
@@ -100,13 +100,13 @@ int main(int argc, char** argv) {
   if (!read_f32(indir + "/spk_embedding.f32", spk_embedding)) return 1;
   if (!read_f32(indir + "/noise_z.f32", noise_z)) return 1;
 
-  larynx::flow::FlowDecoder decoder;
+  velum::flow::FlowDecoder decoder;
   if (!decoder.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;
   }
 
-  larynx::flow::FlowDebug dbg;
+  velum::flow::FlowDebug dbg;
   std::vector<float> mel;
   if (!decoder.infer(prompt_tokens, tokens, prompt_feat, spk_embedding, noise_z,
                      mel, &dbg)) {

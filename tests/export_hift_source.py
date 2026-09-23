@@ -26,7 +26,7 @@ File format (little-endian):
     f32[harmonic_dim]                    rand_ini
     f32[sine_max_samples * harmonic_dim] sine_waves   (row-major [t, h])
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap`` (same as tests/hift_reference.py).
 
 Usage:

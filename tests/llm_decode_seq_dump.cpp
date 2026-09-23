@@ -11,7 +11,7 @@
 //   seq_logits.f32   (N*6761 floats)   llm_decoder output for steps 0..N-1,
 //                                      concatenated (step-major)
 //
-// Usage: larynx_llm_decode_seq_dump <llm.gguf> <indir> <outdir>
+// Usage: velum_llm_decode_seq_dump <llm.gguf> <indir> <outdir>
 // Reads : <indir>/lm_input.f32  (L*896 float32; L inferred from size)
 //         <indir>/tokens.i32    (N int32 speech token ids)
 // Writes: the file above.
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 namespace {
 
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   std::vector<int32_t> tokens;
   if (!read_i32(indir + "/tokens.i32", tokens)) return 1;
 
-  larynx::llm::LLM llm;
+  velum::llm::LLM llm;
   if (!llm.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;

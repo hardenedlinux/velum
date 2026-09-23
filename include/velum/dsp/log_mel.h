@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace larynx::dsp {
+namespace velum::dsp {
 
 // Whisper-style log-mel spectrogram (128 bins).
 //
@@ -22,4 +22,4 @@ namespace larynx::dsp {
 std::vector<float> log_mel_spectrogram(const float *samples, size_t n,
                                        int n_mels = 128);
 
-}  // namespace larynx::dsp
+}  // namespace velum::dsp

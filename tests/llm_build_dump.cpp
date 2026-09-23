@@ -13,7 +13,7 @@
 // can localize a mismatch to a specific embedding table or index (they are pure
 // slices of lm_input, not independently computed).
 //
-// Usage: larynx_llm_build_dump <llm.gguf> <indir> <outdir>
+// Usage: velum_llm_build_dump <llm.gguf> <indir> <outdir>
 // Reads : <indir>/text_tokens.i32          (Pt+T int32 token ids)
 //         <indir>/prompt_speech_token.i32  (P int32 speech-token ids; may be empty)
 // Writes: <outdir>/lm_input.f32            (L*896 float32, L = 1+PtT+1+P)
@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 namespace {
 
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
   if (!read_i32(indir + "/prompt_speech_token.i32", prompt_speech_token)) return 1;
   const size_t PtT = text_tokens.size(), P = prompt_speech_token.size();
 
-  larynx::llm::LLM llm;
+  velum::llm::LLM llm;
   if (!llm.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;

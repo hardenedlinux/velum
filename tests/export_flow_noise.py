@@ -19,7 +19,7 @@ File format (little-endian):
     u64  max_frames = 50 * 300   (15,000)
     f32[mel_dim * max_frames]   rand_noise  (row-major [c][t]: c*max_frames + t)
 
-Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the larynx
+Runs under the CosyVoice python3.10 env (torch 2.3.1+cu121), NOT the velum
 ``.venv`` — see ``_bootstrap`` (same as tests/hift_reference.py).
 
 Usage:

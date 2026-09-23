@@ -20,14 +20,14 @@
 #include <string>
 #include <vector>
 
-namespace larynx {
+namespace velum {
 
 // Init the best available compute backend (CUDA/GPU when compiled in and a
 // device is present, else CPU). Logs the choice. Returns nullptr on failure.
-// Set LARYNX_BACKEND=cpu to force the CPU backend (used by the numerical
+// Set VELUM_BACKEND=cpu to force the CPU backend (used by the numerical
 // verify scripts so they don't depend on an idle GPU).
 inline ggml_backend_t backend_init_best() {
-  const char* force = std::getenv("LARYNX_BACKEND");
+  const char* force = std::getenv("VELUM_BACKEND");
   ggml_backend_t b = nullptr;
   if (force && std::strcmp(force, "cpu") == 0) {
     b = ggml_backend_cpu_init();
@@ -36,7 +36,7 @@ inline ggml_backend_t backend_init_best() {
   }
   if (!b) b = ggml_backend_cpu_init();
   if (b) {
-    fprintf(stderr, "larynx: ggml backend = %s\n", ggml_backend_name(b));
+    fprintf(stderr, "velum: ggml backend = %s\n", ggml_backend_name(b));
   }
   return b;
 }
@@ -51,13 +51,13 @@ inline ggml_backend_buffer_t upload_gguf_weights(gguf_context* gctx,
                                                  const std::string& path) {
   ggml_backend_buffer_t buf = ggml_backend_alloc_ctx_tensors(wctx, backend);
   if (!buf) {
-    fprintf(stderr, "larynx: ggml_backend_alloc_ctx_tensors returned null\n");
+    fprintf(stderr, "velum: ggml_backend_alloc_ctx_tensors returned null\n");
     return nullptr;
   }
 
   FILE* f = fopen(path.c_str(), "rb");
   if (!f) {
-    fprintf(stderr, "larynx: cannot reopen '%s' to upload weights\n", path.c_str());
+    fprintf(stderr, "velum: cannot reopen '%s' to upload weights\n", path.c_str());
     return buf;  // buffer is still valid; caller frees it
   }
 
@@ -72,7 +72,7 @@ inline ggml_backend_buffer_t upload_gguf_weights(gguf_context* gctx,
     tmp.resize(nbytes);
     const size_t off = data_off + gguf_get_tensor_offset(gctx, i);
     if (fseek(f, (long)off, SEEK_SET) != 0 || fread(tmp.data(), 1, nbytes, f) != nbytes) {
-      fprintf(stderr, "larynx: failed to read tensor '%s' from '%s'\n", name, path.c_str());
+      fprintf(stderr, "velum: failed to read tensor '%s' from '%s'\n", name, path.c_str());
       ok = false;
       break;
     }
@@ -115,4 +115,4 @@ struct TensorInit {
   }
 };
 
-}  // namespace larynx
+}  // namespace velum

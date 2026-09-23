@@ -3,7 +3,7 @@
 
 For each test signal this script:
   1. writes the float32 PCM to a temp file,
-  2. runs the compiled ``larynx_dump`` utility (path from $LARYNX_DUMP),
+  2. runs the compiled ``velum_dump`` utility (path from $VELUM_DUMP),
   3. loads the C++ log-mel / fbank / mean-normalized fbank outputs,
   4. computes the Python references
        whisper.log_mel_spectrogram(samples, n_mels=128)
@@ -20,8 +20,8 @@ bug in the C++.
 This is pure-CPU and requires only numpy/torch/torchaudio/openai-whisper.
 
 Usage:
-    python3 tests/verify_dsp.py            # uses build/larynx_dump by default
-    LARYNX_DUMP=./build/larynx_dump python3 tests/verify_dsp.py
+    python3 tests/verify_dsp.py            # uses build/velum_dump by default
+    VELUM_DUMP=./build/velum_dump python3 tests/verify_dsp.py
 """
 
 import os
@@ -99,9 +99,9 @@ def make_signals():
 
 
 def main():
-    dump_bin = os.environ.get("LARYNX_DUMP", os.path.join(ROOT, "build", "larynx_dump"))
+    dump_bin = os.environ.get("VELUM_DUMP", os.path.join(ROOT, "build", "velum_dump"))
     if not os.path.exists(dump_bin):
-        sys.exit(f"larynx_dump not found at {dump_bin}; build it first (cmake --build build)")
+        sys.exit(f"velum_dump not found at {dump_bin}; build it first (cmake --build build)")
 
     print(f"whisper {whisper.__version__} | torch {torch.__version__} | torchaudio {torchaudio.__version__}")
     print(f"dump binary: {dump_bin}\n")

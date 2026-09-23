@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace larynx::hift {
+namespace velum::hift {
 
 // Human-readable module banner for the CLI (Phase 3: implemented).
 std::string module_name();
@@ -89,4 +89,4 @@ class HiftVocoder {
   Impl* impl_;
 };
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

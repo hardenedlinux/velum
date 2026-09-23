@@ -7,7 +7,7 @@
 
 We patch the vendored GGML checkout so its CUDA backend uses
 `CUBLAS_DEFAULT_MATH` instead of `CUBLAS_TF32_TENSOR_OP_MATH` for cuBLAS GEMMs,
-and we static-link GGML into `larynx` and its tools. The patch is committed as
+and we static-link GGML into `velum` and its tools. The patch is committed as
 `patches/0001-ggml-cuda-disable-tf32-tensor-op-math.patch`, applied idempotently
 by CMake at configure time, and GGML is built as static archives
 (`BUILD_SHARED_LIBS=OFF`). We do **not** rely on `ggml_mul_mat_set_prec`,
@@ -64,7 +64,7 @@ Two concerns are addressed together:
   applied at build time, the vendored checkout in the working tree stays a
   faithful copy of the pinned upstream commit until configure runs, and no
   stray `libggml-cuda.so` is ever dropped onto a system path — the fix travels
-  inside the `larynx` binary itself.
+  inside the `velum` binary itself.
 - **Maintainability.** Patches live in one directory (`patches/`), are applied
   idempotently (skip if already applied), and **fail loudly** — never silently —
   if upstream moves the target code so the patch no longer applies
@@ -80,7 +80,7 @@ a full `-static` system link and is deliberately **not** used.
 
 ## Consequences
 
-- `ldd build/larynx` shows no `libggml-base.so` / `libggml-cpu.so` /
+- `ldd build/velum` shows no `libggml-base.so` / `libggml-cpu.so` /
   `libggml-cuda.so`; NVIDIA's `libcuda.so` / `libcudart.so` / `libcublas.so`
   remain dynamically linked (unavoidable, and out of scope).
 - The `patches/` directory and the CMake apply-step are part of the build

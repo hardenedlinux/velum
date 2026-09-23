@@ -11,7 +11,7 @@
 // (2) we embed the exact `mel_128` filterbank from whisper's mel_filters.npz
 // rather than reading it from a GGML model file.
 
-#include "larynx/dsp/log_mel.h"
+#include "velum/dsp/log_mel.h"
 
 #include "mel_filters_128.h"
 
@@ -19,7 +19,7 @@
 #include <cmath>
 #include <vector>
 
-namespace larynx::dsp {
+namespace velum::dsp {
 namespace {
 
 constexpr double kPi = 3.14159265358979323846;
@@ -127,4 +127,4 @@ std::vector<float> log_mel_spectrogram(const float *samples, size_t n, int n_mel
   return mel;
 }
 
-}  // namespace larynx::dsp
+}  // namespace velum::dsp

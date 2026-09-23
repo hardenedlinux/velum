@@ -2,7 +2,7 @@
 // DSP frontend features, and writes them back as raw float32 so
 // tests/verify_dsp.py can compare against the Python references.
 //
-// Usage: larynx_dump <input.f32> <outdir>
+// Usage: velum_dump <input.f32> <outdir>
 // Writes: <outdir>/logmel.f32      (128 x n_frames_lm,  row-major)
 //         <outdir>/fbank.f32       (n_frames_fb x 80,   row-major)
 //         <outdir>/fbank_norm.f32  (n_frames_fb x 80,   per-bin mean subtracted)
@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "larynx/dsp/fbank.h"
-#include "larynx/dsp/log_mel.h"
+#include "velum/dsp/fbank.h"
+#include "velum/dsp/log_mel.h"
 
 namespace {
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
   const size_t n = samples.size();
 
-  std::vector<float> lm = larynx::dsp::log_mel_spectrogram(samples.data(), n, 128);
+  std::vector<float> lm = velum::dsp::log_mel_spectrogram(samples.data(), n, 128);
   const size_t n_frames_lm = n / 160;
   if (lm.size() != 128 * n_frames_lm) {
     std::fprintf(stderr, "log-mel shape mismatch: got %zu, expected %zu\n",
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  std::vector<float> fb = larynx::dsp::fbank(samples.data(), n, 80);
+  std::vector<float> fb = velum::dsp::fbank(samples.data(), n, 80);
   const size_t n_frames_fb = 1 + (n - 400) / 160;
   if (fb.size() != n_frames_fb * 80) {
     std::fprintf(stderr, "fbank shape mismatch: got %zu, expected %zu\n",
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
   }
 
   std::vector<float> fb_norm = fb;
-  larynx::dsp::subtract_bin_mean(fb_norm, n_frames_fb, 80);
+  velum::dsp::subtract_bin_mean(fb_norm, n_frames_fb, 80);
 
   write_all_floats(outdir + "/logmel.f32", lm);
   write_all_floats(outdir + "/fbank.f32", fb);

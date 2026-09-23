@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace larynx::pipeline {
+namespace velum::pipeline {
 
 // Pre-extracted prompt-side features. These come from the deferred Python-only
 // components (speech tokenizer, campplus, matcha mel), written to disk by
@@ -71,4 +71,4 @@ class Pipeline {
   std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace larynx::pipeline
+}  // namespace velum::pipeline

@@ -20,7 +20,7 @@ Dumped (per decode step 0..N-1):
   ``cand_probs``     (N, top_k)  candidate softmax probs, padded with 0.
 
 Constants mirror cosyvoice3.yaml (ras_sampling top_p=0.8 top_k=25) and
-CosyVoice3LM (speech_token_size=6561). Runs under the larynx .venv (torch only;
+CosyVoice3LM (speech_token_size=6561). Runs under the velum .venv (torch only;
 no CosyVoice import).
 
 Usage:

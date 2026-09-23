@@ -10,7 +10,7 @@
 //      and, as a self-consistency check, the 5-arg vocode() fed the same slice
 //      explicitly — both audios must be bit-identical.
 //
-// Usage: larynx_hift_source_dump <hift.gguf> <hift_source.bin> <indir> <outdir>
+// Usage: velum_hift_source_dump <hift.gguf> <hift_source.bin> <indir> <outdir>
 // Reads : <indir>/mel.f32   (80*T_mel float32)
 // Writes: <outdir>/rand_ini.f32        (9)         loaded phase offsets
 //         <outdir>/sine_waves.f32      (7200000*9) loaded full bank
@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/hift/hift.h"
+#include "velum/hift/hift.h"
 
 namespace {
 
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
   std::vector<float> mel;
   if (!read_f32(indir + "/mel.f32", mel)) return 1;
 
-  larynx::hift::HiftVocoder vocoder;
+  velum::hift::HiftVocoder vocoder;
   if (!vocoder.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;

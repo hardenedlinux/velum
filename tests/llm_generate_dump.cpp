@@ -4,7 +4,7 @@
 // pre-built lm_input) and checks the stop behavior.
 //
 // This is the decode-loop-autonomy half of Checkpoint 6: unlike
-// larynx_llm_decode_seq_dump (which injects a captured token trajectory), this
+// velum_llm_decode_seq_dump (which injects a captured token trajectory), this
 // tool lets the C++ sample its own tokens with its own RNG, feed them back into
 // its own KV cache, and stop on its own when a stop token (>=6561) is drawn.
 //
@@ -12,7 +12,7 @@
 //   stop_token.i32   (1 int32)  stop token id (6561..6760), or -1 if truncated
 //   steps.i32        (1 int32)  decode steps executed == N
 //
-// Usage: larynx_llm_generate_dump <llm.gguf> <indir> <outdir>
+// Usage: velum_llm_generate_dump <llm.gguf> <indir> <outdir>
 // Reads : <indir>/lm_input.f32 (L*896 float32; L inferred from size)
 //         <indir>/min_len.i32, <indir>/max_len.i32, <indir>/seed.i32 (single int32 each)
 // Writes: the files above.
@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "larynx/llm/llm.h"
+#include "velum/llm/llm.h"
 
 namespace {
 
@@ -99,13 +99,13 @@ int main(int argc, char** argv) {
   if (!read_i32_one(indir + "/max_len.i32", max_len)) return 1;
   if (!read_i32_one(indir + "/seed.i32", seed)) return 1;
 
-  larynx::llm::LLM llm;
+  velum::llm::LLM llm;
   if (!llm.load(gguf)) {
     std::fprintf(stderr, "failed to load %s\n", gguf.c_str());
     return 1;
   }
 
-  larynx::llm::GenerationResult res;
+  velum::llm::GenerationResult res;
   if (!llm.generate(lm_input, L, (int)min_len, (int)max_len, (unsigned)seed, &res)) {
     std::fprintf(stderr, "generate failed\n");
     return 1;

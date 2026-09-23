@@ -1,13 +1,13 @@
-#include "larynx/pipeline/pipeline.h"
+#include "velum/pipeline/pipeline.h"
 
-#include "larynx/flow/flow.h"
-#include "larynx/hift/hift.h"
-#include "larynx/llm/llm.h"
-#include "larynx/llm/tokenizer.h"
+#include "velum/flow/flow.h"
+#include "velum/hift/hift.h"
+#include "velum/llm/llm.h"
+#include "velum/llm/tokenizer.h"
 
 #include <cstdio>
 
-namespace larynx::pipeline {
+namespace velum::pipeline {
 
 namespace {
 
@@ -22,10 +22,10 @@ std::vector<int32_t> to_i32(const std::vector<int>& v) {
 }  // namespace
 
 struct Pipeline::Impl {
-  larynx::llm::LLM llm;
-  larynx::llm::Qwen2Tokenizer tokenizer;
-  larynx::flow::FlowDecoder flow;
-  larynx::hift::HiftVocoder hift;
+  velum::llm::LLM llm;
+  velum::llm::Qwen2Tokenizer tokenizer;
+  velum::flow::FlowDecoder flow;
+  velum::hift::HiftVocoder hift;
 };
 
 Pipeline::Pipeline() : impl_(new Impl()) {}
@@ -88,7 +88,7 @@ bool Pipeline::synthesize(const std::string& instruct,
   // 3. Generate speech tokens (min/max from the reference: 2x / 20x text len).
   const int min_len = 2 * (int)text_tok.size();
   const int max_len = 20 * (int)text_tok.size();
-  larynx::llm::GenerationResult gen;
+  velum::llm::GenerationResult gen;
   if (!impl_->llm.generate(lm_input, L, min_len, max_len, seed, &gen)) {
     std::fprintf(stderr, "pipeline: LLM generate failed\n");
     return false;
@@ -119,4 +119,4 @@ bool Pipeline::synthesize(const std::string& instruct,
   return true;
 }
 
-}  // namespace larynx::pipeline
+}  // namespace velum::pipeline

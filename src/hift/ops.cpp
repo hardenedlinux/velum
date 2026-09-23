@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstring>
 
-namespace larynx::hift {
+namespace velum::hift {
 
 ggml_tensor* conv1d_f32(ggml_context* ctx, ggml_tensor* kernel, ggml_tensor* input,
                         ggml_tensor* bias, int s0, int d0) {
@@ -72,4 +72,4 @@ ggml_tensor* reflection_pad_left1(ggml_context* ctx, ggml_tensor* x) {
   return ggml_concat(ctx, first, xc, 0);  // [1 + T, C, N]
 }
 
-}  // namespace larynx::hift
+}  // namespace velum::hift

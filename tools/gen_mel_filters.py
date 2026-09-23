@@ -45,7 +45,7 @@ def main() -> int:
     lines.append("")
     lines.append("#include <cstddef>")
     lines.append("")
-    lines.append("namespace larynx::dsp {")
+    lines.append("namespace velum::dsp {")
     lines.append("")
     lines.append("inline constexpr int kWhisperNMels = 128;")
     lines.append("inline constexpr int kWhisperNFFTBins = 201;")
@@ -67,7 +67,7 @@ def main() -> int:
         lines.append(f"    {rendered},")
     lines.append("};")
     lines.append("")
-    lines.append("}  // namespace larynx::dsp")
+    lines.append("}  // namespace velum::dsp")
     lines.append("")
 
     with open(OUT_HEADER, "w") as f:

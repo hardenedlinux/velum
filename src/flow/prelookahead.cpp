@@ -1,6 +1,6 @@
 #include "internal.h"
 
-namespace larynx::flow {
+namespace velum::flow {
 
 // PreLookaheadLayer (upsample_encoder.py). token_embed = [80, T, 1] (== (1,T,80)).
 // inputs -> transpose -> pad(0,3) -> conv1(80->1024,k4) -> leaky_relu
@@ -19,4 +19,4 @@ ggml_tensor* build_prelookahead(ggml_context* ctx, const FlowWeights& w, ggml_te
   return ggml_add(ctx, ggml_cont(ctx, y), token_embed);           // residual (src0 must be contiguous)
 }
 
-}  // namespace larynx::flow
+}  // namespace velum::flow

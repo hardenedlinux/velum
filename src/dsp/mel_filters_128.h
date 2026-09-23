@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-namespace larynx::dsp {
+namespace velum::dsp {
 
 inline constexpr int kWhisperNMels = 128;
 inline constexpr int kWhisperNFFTBins = 201;
@@ -3231,4 +3231,4 @@ inline const float kWhisperMelFilters[kWhisperNMels * kWhisperNFFTBins] = {
     0.00275864848f, 0.00390012516f, 0.0050416016f, 0.00445712078f, 0.00334284059f, 0.00222856039f, 0.0011142802f, 0.0f,
 };
 
-}  // namespace larynx::dsp
+}  // namespace velum::dsp

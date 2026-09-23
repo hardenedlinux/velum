@@ -1,9 +1,9 @@
-# Larynx  Architecture Reference
+# Velum  Architecture Reference
 
 **Status:** Design locked after ONNX Runtime prototype revealed unresolved
 numerical divergence in the Flow decoder (see `docs/adr/0001-drop-onnx-runtime-for-compute.md`).
 **Target:** Zero Python dependency at deployment time. A single native
-binary, `larynx`, that takes text (+ voice script) and produces PCM/WAV.
+binary, `velum`, that takes text (+ voice script) and produces PCM/WAV.
 
 ---
 
