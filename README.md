@@ -94,7 +94,8 @@ Two Python environments are used:
 
 - **`.venv`** — repo-local, `torch` + `numpy`, for weight conversion.
 - **CosyVoice python3.10** — the reference environment that can import
-  `cosyvoice`/`transformers`, for tokenizer/asset/prompt extraction.
+  `cosyvoice`/`transformers`, for asset/prompt extraction (the tokenizer data
+  is now committed; see step 2).
 
 ```sh
 # paths used below
@@ -115,13 +116,17 @@ writes `build/llm.gguf` / `build/flow.gguf` / `build/hift.gguf` (format-only
 conversion, no quantization). Use `--llm "$MODEL/llm.rl.pt"` for the RL-tuned
 checkpoint.
 
-**2. Export the text tokenizer** (python3.10):
+**2. Text tokenizer data** (committed — no Python needed):
+
+`vocab.tsv` / `merges.txt` / `added_tokens.tsv` are committed under
+`data/tokenizer/` (see `data/tokenizer/README.md` for provenance and licensing).
+The build copies them into `build/tokenizer/` automatically, so this step is a
+no-op for normal builds. To regenerate them from a model checkout (e.g. when
+bumping the CosyVoice version), run the standard-library-only script:
 
 ```sh
-PYTHONPATH="$PYTHONPATH" "$PY310" tools/export_tokenizer.py --out-dir build/tokenizer
+python3 tools/export_tokenizer.py --out-dir data/tokenizer
 ```
-
-writes `vocab.tsv` / `merges.txt` / `added_tokens.tsv`.
 
 **3. Export the fixed RNG buffers** (python3.10):
 

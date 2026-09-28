@@ -158,6 +158,38 @@ target_link_libraries(velum PRIVATE
   velum_hift
 )
 
+# --- Committed tokenizer data -> build tree ---------------------------------
+# Copy the committed tokenizer data into the build tree so `velum`'s default
+# --tokenizer-dir (build/tokenizer) works without running any Python. The data
+# lives in data/tokenizer/ (see its README for provenance and licensing).
+#
+# TODO(packaging): when Velum is installed, add
+#   install(FILES data/tokenizer/vocab.tsv data/tokenizer/merges.txt
+#           data/tokenizer/added_tokens.tsv DESTINATION share/velum/tokenizer)
+# and make the default --tokenizer-dir fall back to that installed path — a
+# build/ directory will not exist next to an installed binary.
+set(VELUM_TOKENIZER_DATA_OUT
+  ${CMAKE_CURRENT_BINARY_DIR}/tokenizer/vocab.tsv
+  ${CMAKE_CURRENT_BINARY_DIR}/tokenizer/merges.txt
+  ${CMAKE_CURRENT_BINARY_DIR}/tokenizer/added_tokens.tsv)
+
+add_custom_command(
+  OUTPUT ${VELUM_TOKENIZER_DATA_OUT}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/tokenizer
+  COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/vocab.tsv
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/merges.txt
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/added_tokens.tsv
+          ${CMAKE_CURRENT_BINARY_DIR}/tokenizer
+  DEPENDS
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/vocab.tsv
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/merges.txt
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/tokenizer/added_tokens.tsv
+  COMMENT "Copying committed tokenizer data into build/tokenizer")
+
+add_custom_target(velum_tokenizer_data DEPENDS ${VELUM_TOKENIZER_DATA_OUT})
+add_dependencies(velum velum_tokenizer_data)
+
 # Test utility used by tests/verify_dsp.py for the numerical comparison.
 add_executable(velum_dump tests/dump_features.cpp)
 target_link_libraries(velum_dump PRIVATE velum_dsp)
