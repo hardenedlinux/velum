@@ -1,0 +1,166 @@
+{
+  "description": "Golden reference: token IDs produced by the official CosyVoice3 text tokenizer (CosyVoice3Tokenizer.encode() == Qwen2TokenizerFast input_ids over the CosyVoice-BlankEN base tokenizer). Each case maps an input text to its expected token-id sequence; the velum C++ Qwen2Tokenizer must reproduce these ids bit-exactly.",
+  "generator": {
+    "tokenizer": "cosyvoice.tokenizer.tokenizer.CosyVoice3Tokenizer.encode()",
+    "model_dir": "Fun-CosyVoice3-0.5B/CosyVoice-BlankEN",
+    "cosyvoice_commit": "074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc",
+    "generated": "2026-09-28"
+  },
+  "cases": [
+    {
+      "text": "今天天气不错，我们一起去公园散步吧。",
+      "ids": [
+        36171,
+        35727,
+        35727,
+        99180,
+        16530,
+        28726,
+        3837,
+        35946,
+        79478,
+        14777,
+        71618,
+        85336,
+        34317,
+        99354,
+        99632,
+        64682,
+        100003,
+        1773
+      ]
+    },
+    {
+      "text": "Hello, how are you today?",
+      "ids": [
+        9707,
+        11,
+        1246,
+        525,
+        498,
+        3351,
+        30
+      ]
+    },
+    {
+      "text": "Hello world 你好世界，今天很开心。",
+      "ids": [
+        9707,
+        1879,
+        220,
+        56568,
+        52801,
+        99244,
+        97120,
+        3837,
+        36171,
+        35727,
+        99165,
+        29767,
+        63109,
+        1773
+      ]
+    },
+    {
+      "text": "报道[j][ǐ]予好评",
+      "ids": [
+        42278,
+        44793,
+        151797,
+        151913,
+        99944,
+        52801,
+        63379
+      ]
+    },
+    {
+      "text": "The vowel [AA0] is in father, and [B] in boy.",
+      "ids": [
+        785,
+        76181,
+        220,
+        151665,
+        374,
+        304,
+        6981,
+        11,
+        323,
+        220,
+        151688,
+        304,
+        8171,
+        13
+      ]
+    },
+    {
+      "text": "在面对挑战时，他展现了非凡的<strong>勇气</strong>与<strong>智慧</strong>。",
+      "ids": [
+        18493,
+        27091,
+        32664,
+        100428,
+        99191,
+        13343,
+        3837,
+        42411,
+        76313,
+        46451,
+        34187,
+        65676,
+        100216,
+        9370,
+        151648,
+        100244,
+        99180,
+        151649,
+        57218,
+        151648,
+        99473,
+        101104,
+        151649,
+        1773
+      ]
+    },
+    {
+      "text": "他[laughter]笑了笑[breath]，然后[sigh]叹了口气。",
+      "ids": [
+        42411,
+        151651,
+        48738,
+        34187,
+        48738,
+        151647,
+        3837,
+        60894,
+        33447,
+        151659,
+        100330,
+        34187,
+        39426,
+        99180,
+        1773
+      ]
+    },
+    {
+      "text": "You are a helpful assistant. 请用普通话表达。<|endofprompt|>",
+      "ids": [
+        2610,
+        525,
+        264,
+        10950,
+        17847,
+        13,
+        220,
+        14880,
+        11622,
+        99537,
+        31935,
+        57443,
+        20742,
+        93488,
+        1773,
+        151646
+      ]
+    }
+  ]
+}
