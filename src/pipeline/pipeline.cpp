@@ -26,17 +26,14 @@ struct Pipeline::Impl {
   velum::llm::Qwen2Tokenizer tokenizer;
   velum::flow::FlowDecoder flow;
   velum::hift::HiftVocoder hift;
+  bool llm_loaded = false;
+  bool vocoder_loaded = false;
 };
 
 Pipeline::Pipeline() : impl_(new Impl()) {}
 Pipeline::~Pipeline() = default;
 
-bool Pipeline::load(const std::string& llm_gguf,
-                    const std::string& flow_gguf,
-                    const std::string& hift_gguf,
-                    const std::string& hift_source_bin,
-                    const std::string& flow_noise_bin,
-                    const std::string& tokenizer_dir) {
+bool Pipeline::load_llm(const std::string& llm_gguf, const std::string& tokenizer_dir) {
   if (!impl_->tokenizer.load(tokenizer_dir)) {
     std::fprintf(stderr, "pipeline: tokenizer load failed (%s)\n", tokenizer_dir.c_str());
     return false;
@@ -45,30 +42,22 @@ bool Pipeline::load(const std::string& llm_gguf,
     std::fprintf(stderr, "pipeline: LLM load failed (%s)\n", llm_gguf.c_str());
     return false;
   }
-  if (!impl_->flow.load(flow_gguf)) {
-    std::fprintf(stderr, "pipeline: Flow load failed (%s)\n", flow_gguf.c_str());
-    return false;
-  }
-  if (!impl_->flow.load_noise(flow_noise_bin)) {
-    std::fprintf(stderr, "pipeline: Flow noise load failed (%s)\n", flow_noise_bin.c_str());
-    return false;
-  }
-  if (!impl_->hift.load(hift_gguf)) {
-    std::fprintf(stderr, "pipeline: HiFT load failed (%s)\n", hift_gguf.c_str());
-    return false;
-  }
-  if (!impl_->hift.load_source(hift_source_bin)) {
-    std::fprintf(stderr, "pipeline: HiFT source load failed (%s)\n", hift_source_bin.c_str());
-    return false;
-  }
+  impl_->llm_loaded = true;
   return true;
 }
 
-bool Pipeline::synthesize(const std::string& instruct,
-                          const std::string& text,
-                          const PromptFeatures& prompt,
-                          unsigned seed,
-                          SynthesisResult& out) {
+bool Pipeline::generate_tokens(const std::string& instruct, const std::string& text,
+                               unsigned seed, std::vector<int32_t>& tokens) {
+  if (!impl_->llm_loaded) {
+    std::fprintf(stderr, "pipeline: generate_tokens before load_llm\n");
+    return false;
+  }
+
+  // Reset the LLM's autoregressive state (KV cache + position) from any prior
+  // segment. The weights and backend stay resident for the whole Phase 1; only
+  // the per-synthesis inference state is cleared between segments.
+  impl_->llm.reset();
+
   // 1. Tokenize prompt text (instruct) + target text, concat.
   const std::vector<int32_t> prompt_text_tok = impl_->tokenizer.encode(instruct);
   const std::vector<int32_t> text_tok = impl_->tokenizer.encode(text);
@@ -93,29 +82,57 @@ bool Pipeline::synthesize(const std::string& instruct,
     std::fprintf(stderr, "pipeline: LLM generate failed\n");
     return false;
   }
-  out.tokens = gen.tokens;
+  tokens = to_i32(gen.tokens);
+  return true;
+}
 
-  // Release the LLM's resident weights (~2.4 GiB on CUDA) before the Flow
-  // decoder builds its DiT graph (~4 GiB): the two do not fit an 8 GiB card
-  // together. This mirrors the Python acceptance gate, which frees model.llm
-  // before running the Flow/HiFT decoders. The LLM is single-shot per synth.
+void Pipeline::release_llm() {
   impl_->llm.release();
+  impl_->llm_loaded = false;
+}
 
-  // 4. Flow: speech tokens -> mel (prompt token + matcha mel + spk embedding).
-  std::vector<float> mel;
-  if (!impl_->flow.infer(prompt.prompt_tokens, to_i32(gen.tokens),
-                         prompt.prompt_feat, prompt.spk_embedding, mel)) {
+bool Pipeline::load_vocoder(const std::string& flow_gguf, const std::string& hift_gguf,
+                            const std::string& hift_source_bin,
+                            const std::string& flow_noise_bin) {
+  if (!impl_->flow.load(flow_gguf)) {
+    std::fprintf(stderr, "pipeline: Flow load failed (%s)\n", flow_gguf.c_str());
+    return false;
+  }
+  if (!impl_->flow.load_noise(flow_noise_bin)) {
+    std::fprintf(stderr, "pipeline: Flow noise load failed (%s)\n", flow_noise_bin.c_str());
+    return false;
+  }
+  if (!impl_->hift.load(hift_gguf)) {
+    std::fprintf(stderr, "pipeline: HiFT load failed (%s)\n", hift_gguf.c_str());
+    return false;
+  }
+  if (!impl_->hift.load_source(hift_source_bin)) {
+    std::fprintf(stderr, "pipeline: HiFT source load failed (%s)\n", hift_source_bin.c_str());
+    return false;
+  }
+  impl_->vocoder_loaded = true;
+  return true;
+}
+
+bool Pipeline::decode(const std::vector<int32_t>& tokens, const PromptFeatures& prompt,
+                      std::vector<float>& audio, std::vector<float>& mel) {
+  if (!impl_->vocoder_loaded) {
+    std::fprintf(stderr, "pipeline: decode before load_vocoder\n");
+    return false;
+  }
+
+  // Flow: speech tokens -> mel (prompt token + matcha mel + spk embedding).
+  if (!impl_->flow.infer(prompt.prompt_tokens, tokens, prompt.prompt_feat,
+                         prompt.spk_embedding, mel)) {
     std::fprintf(stderr, "pipeline: Flow infer failed\n");
     return false;
   }
-  out.mel = mel;
 
-  // 5. HiFT: mel -> PCM.
-  if (!impl_->hift.vocode(mel, out.audio)) {
+  // HiFT: mel -> PCM.
+  if (!impl_->hift.vocode(mel, audio)) {
     std::fprintf(stderr, "pipeline: HiFT vocode failed\n");
     return false;
   }
-  out.sample_rate = 24000;
   return true;
 }
 

@@ -34,3 +34,13 @@ surfaces.
 - The **acceleration** row is a *design difference*, not a functional gap: GGML
   replaces the vLLM / TensorRT / fp16 backends. Keep it distinct from the real
   feature gaps above when presenting this list.
+- **Velum extension — per-sentence instruction** (`--segments-file`): Velum can
+  synthesize a JSON array of `{"text", "instruct"}` segments, each with its own
+  instruction, concatenated into one wav with a silence gap
+  (`--segment-gap-ms`). Upstream CosyVoice3 has no per-sentence instruct path
+  (one `instruct` per inference), so this is a Velum addition, not a parity gap.
+- **Adviser JSON DSL** (from the Auteur requirements): **out of scope by
+  design.** It is a structured per-utterance input DSL that is compiled on the
+  upstream side. Velum deliberately does not implement the DSL itself — it
+  implements the two things the DSL compiles down to: the annotation syntax
+  (`docs/annotation-syntax.md`) and per-segment input (`--segments-file`).

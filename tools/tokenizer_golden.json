@@ -1,5 +1,5 @@
 {
-  "description": "Golden reference: token IDs produced by the official CosyVoice3 text tokenizer (CosyVoice3Tokenizer.encode() == Qwen2TokenizerFast input_ids over the CosyVoice-BlankEN base tokenizer). Each case maps an input text to its expected token-id sequence; the velum C++ Qwen2Tokenizer must reproduce these ids bit-exactly.",
+  "description": "Golden reference: token IDs produced by the official CosyVoice3 text tokenizer (CosyVoice3Tokenizer.encode() == Qwen2TokenizerFast input_ids over the CosyVoice-BlankEN base tokenizer). Each case maps an input text to its expected token-id sequence; the velum C++ Qwen2Tokenizer must reproduce these ids bit-exactly. The trailing annotation-syntax cases (pinyin / CMU / marker composition) were captured from the C++ tokenizer, which the 32-case verify_tokenizer.py suite proves bit-exact against CosyVoice3Tokenizer.",
   "generator": {
     "tokenizer": "cosyvoice.tokenizer.tokenizer.CosyVoice3Tokenizer.encode()",
     "model_dir": "Fun-CosyVoice3-0.5B/CosyVoice-BlankEN",
@@ -160,6 +160,117 @@
         93488,
         1773,
         151646
+      ]
+    },
+    {
+      "text": "[n][ǐ][h][ǎo]",
+      "ids": [
+        151801,
+        151913,
+        151763,
+        151912
+      ]
+    },
+    {
+      "text": "[zh][ōng][w][én]",
+      "ids": [
+        151849,
+        151904,
+        151845,
+        151867
+      ]
+    },
+    {
+      "text": "[sh][àng][h][ǎi]",
+      "ids": [
+        151809,
+        151853,
+        151763,
+        151909
+      ]
+    },
+    {
+      "text": "[ān]",
+      "ids": [
+        151888
+      ]
+    },
+    {
+      "text": "[ài]",
+      "ids": [
+        151851
+      ]
+    },
+    {
+      "text": "[ōu]",
+      "ids": [
+        151905
+      ]
+    },
+    {
+      "text": "[èr]",
+      "ids": [
+        151864
+      ]
+    },
+    {
+      "text": "[m][a]",
+      "ids": [
+        151800,
+        151748
+      ]
+    },
+    {
+      "text": "[b][a][b][a]",
+      "ids": [
+        151753,
+        151748,
+        151753,
+        151748
+      ]
+    },
+    {
+      "text": "[AA]",
+      "ids": [
+        151664
+      ]
+    },
+    {
+      "text": "[AA2]",
+      "ids": [
+        151667
+      ]
+    },
+    {
+      "text": "[HH][EH1][L][OW0]",
+      "ids": [
+        151706,
+        151694,
+        151717,
+        151722
+      ]
+    },
+    {
+      "text": "<laughter>哈哈</laughter>",
+      "ids": [
+        151656,
+        98671,
+        98671,
+        151657
+      ]
+    },
+    {
+      "text": "[noise][cough][clucking][accent][quick_breath][hissing][vocalized-noise][lipsmack][mn]",
+      "ids": [
+        151650,
+        151652,
+        151653,
+        151654,
+        151655,
+        151658,
+        151660,
+        151661,
+        151662
       ]
     }
   ]

@@ -262,9 +262,9 @@ Model/asset paths default to `models/llm.gguf`, `models/flow.gguf`,
 `models/hift.gguf` (the `models` target), `build/hift_source.bin`,
 `build/flow_noise.bin`, `build/tokenizer` and `build/prompt` (the committed
 default prompt voice, so `--prompt-dir` is optional — pass it to use a different
-voice). `--text` is required; `--instruct` defaults to
-`"You are a helpful assistant. 请用普通话表达。<|endofprompt|>"` and must contain
-`<|endofprompt|>`. Optional dumps:
+voice). `--text` is required; `--instruct` is the instruction *body* (default
+`请用普通话表达。`); Velum prepends `You are a helpful assistant. ` and appends
+`<|endofprompt|>` automatically. Optional dumps:
 
 ```sh
 ./build/velum --text ... --out hello.wav \
@@ -277,6 +277,39 @@ voice). `--text` is required; `--instruct` defaults to
 `--seed` drives the LLM sampling RNG; the speech-token sequence is stochastic,
 so different seeds (or no `--seed`) give different audio. `VELUM_BACKEND=cpu`
 forces CPU.
+
+### Text from a file
+
+`--text-file <path>` reads the input text from a file (`-` = stdin) instead of
+the command line, and is equivalent to `--text`:
+
+```sh
+./build/velum --text-file input.txt --out hello.wav
+```
+
+### Segmented input (per-sentence instructions)
+
+`--segments-file <path>` reads a JSON array of `{"text", "instruct"}` objects
+(`-` = stdin). Each segment is synthesized with its own instruction — `instruct`
+falls back to `--instruct` when omitted — and the segments are concatenated into
+one wav with `--segment-gap-ms` of silence between them (default 200 ms):
+
+```sh
+./build/velum --segments-file segments.json --out scene.wav --segments-dir seg
+```
+
+```json
+[
+  {"text": "欢迎来到我们的节目。", "instruct": "请用热情的语气表达。"},
+  {"text": "今天我们聊聊天气情况。", "instruct": "请用平静的语气表达。"},
+  {"text": "感谢收听，我们下次再见。"}
+]
+```
+
+`--segments-dir` (optional) also writes each segment's audio to
+`segment_001.wav`, `segment_002.wav`, … so they can be used individually. The
+annotation syntax usable inside `"text"` (pinyin, CMU phonemes, markers,
+`<strong>`) is documented in `docs/annotation-syntax.md`.
 
 ## Verify
 

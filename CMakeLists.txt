@@ -149,6 +149,9 @@ target_link_libraries(velum_pipeline PUBLIC velum_llm velum_flow velum_hift)
 
 # --- Executables -------------------------------------------------------------
 add_executable(velum src/cli/main.cpp)
+# nlohmann/json (vendored single header under third_party/nlohmann) backs the
+# --segments-file JSON input in src/cli/main.cpp.
+target_include_directories(velum PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 target_link_libraries(velum PRIVATE
   velum_pipeline
   velum_dsp
@@ -401,3 +404,13 @@ add_test(NAME llm_generate
   COMMAND ${CMAKE_COMMAND} -E env
           VELUM_LLM_GENERATE_DUMP=$<TARGET_FILE:velum_llm_generate_dump>
           ${VELUM_PYTHON} ${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_generate.py)
+# End-to-end CLI: segmented (per-sentence instruct) synthesis. Runs the full
+# `velum` binary on a 3-segment --segments-file and checks the concatenated wav
+# covers the per-segment audio plus the gaps. Needs the `models` target
+# (llm/flow/hift gguf), like the other numerical checks.
+add_test(NAME segments_multisegment
+  COMMAND ${CMAKE_COMMAND} -E env
+          VELUM_BIN=$<TARGET_FILE:velum>
+          VELUM_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+          VELUM_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+          ${VELUM_PYTHON} ${CMAKE_CURRENT_SOURCE_DIR}/tests/verify_segments.py)

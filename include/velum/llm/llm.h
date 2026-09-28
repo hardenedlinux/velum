@@ -92,10 +92,17 @@ class LLM {
   bool generate(const std::vector<float>& lm_input, int L,
                 int min_len, int max_len, unsigned seed, GenerationResult* out);
 
+  // Reset the per-synthesis inference state (KV cache + position counter)
+  // without unloading the resident weights or backend. Called between segments
+  // of a multi-segment synthesis so each segment starts from a clean
+  // autoregressive state; the next prefill() re-populates the cache from
+  // scratch anyway, but this makes the intent explicit and guarantees no stale
+  // cache if a segment aborts partway.
+  void reset();
+
   // Free the resident weight buffer (2.4 GiB on CUDA) + KV cache and mark the
-  // LLM unloaded, reclaiming VRAM for the downstream Flow decoder (whose DiT
-  // graph is ~4 GiB and does not fit alongside the LLM on an 8 GiB card). The
-  // LLM is single-shot per synthesis; call load() again to reuse.
+  // LLM unloaded. This is the full teardown path; the pipeline keeps the LLM
+  // resident for the process lifetime and uses reset() between segments instead.
   void release();
 
  private:
