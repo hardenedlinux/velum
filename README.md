@@ -103,7 +103,7 @@ Each step is explained in detail below (`## Build`, `## Prepare models & assets`
 | `tools/` | offline prep: `fetch_model.py`, `convert_weights.py`, `gen_rng_buffers.py`, `export_tokenizer.py`, `gguf.py`, `gen_mel_filters.py` |
 | `tests/` | `verify_*.py` numerical checks + `export_*.py` / `extract_prompt_features.py` asset producers |
 | `data/` | committed runtime data: `tokenizer/` (BPE vocab + merges), `prompt/` (default prompt-voice bundle) |
-| `docs/` | `ARCHITECTURE.md`, ADRs, `DSP.md`, `FLOW.md`, `HIFT.md`, `LLM.md`, `WEIGHT_FORMAT.md` |
+| `docs/` | `ARCHITECTURE.md`, ADRs, `DSP.md`, `FLOW.md`, `HIFT.md`, `LLM.md`, `WEIGHT_FORMAT.md`, `annotation-syntax.md`, `missing-features.md` |
 
 ## Build
 
@@ -119,9 +119,11 @@ backends are linked into `velum` — at runtime it picks CUDA when a device is
 present and falls back to CPU. Force the CPU backend with `VELUM_BACKEND=cpu`
 (used by the numerical verify scripts so they don't depend on an idle GPU).
 
-> Note: the LLM is large. `llm.gguf` is ~2.6 GB, so a CUDA run needs that much
-> free VRAM (plus the Flow graph). If `cudaMalloc` reports out-of-memory, either
-> free the GPU or prefix the run with `VELUM_BACKEND=cpu`.
+> Note: the LLM is large. `llm.gguf` is ~2.6 GB, but synthesis is two-phase: it
+> generates every speech token with the LLM, releases it, then loads Flow + HiFT,
+> so the LLM and the Flow DiT graph (~4 GiB — the real VRAM peak) never share the
+> GPU. If `cudaMalloc` reports out-of-memory, either free the GPU or prefix the
+> run with `VELUM_BACKEND=cpu`.
 
 ## Prepare models & assets (offline, one-time)
 
@@ -354,9 +356,10 @@ reference, seed 0, `--text "今天天气不错，我们一起去公园散步吧�
 Both backends are **GREEN**. The CPU HiFT pcm (8.112e-3) sits just inside the
 1% line (0.81%) — HiFT's nonlinear (exp/snake/phase) synthesis amplifies the
 Flow mel's float32 accumulation (see `docs/HIFT.md`). The CUDA path pins cuBLAS
-to `CUBLAS_DEFAULT_MATH` (TF32 disabled, `docs/adr/0002`) and releases the LLM
-weights after generation, since the resident LLM + Flow DiT graph (~4 GiB) do not
-fit an 8 GiB card together. Not a bug; a real divergence would land in `RED`.
+to `CUBLAS_DEFAULT_MATH` (TF32 disabled, `docs/adr/0002`). Synthesis is two-phase —
+the LLM generates every speech token and is released before Flow + HiFT load, so
+the resident LLM and the Flow DiT graph (~4 GiB) never share the GPU (they do not
+fit an 8 GiB card together). Not a bug; a real divergence would land in `RED`.
 
 The GREEN margin is **sequence-length dependent**: the HiFT max error is
 concentrated on a few isolated onset samples and grows with mel length. On a
@@ -385,3 +388,5 @@ and **not** a per-run RNG. There is no seed flag for it (see `docs/FLOW.md`).
 - `docs/adr/0001-drop-onnx-runtime-for-compute.md` — why ONNX Runtime is frontend-only.
 - `docs/DSP.md` / `docs/FLOW.md` / `docs/HIFT.md` / `docs/LLM.md` — per-stage reference + validation numbers.
 - `docs/WEIGHT_FORMAT.md` — GGUF tensor organisation.
+- `docs/annotation-syntax.md` — text-side control tokens (instruction format, markers, pinyin, CMU phonemes, `<strong>`).
+- `docs/missing-features.md` — parity checklist vs. upstream CosyVoice3.
