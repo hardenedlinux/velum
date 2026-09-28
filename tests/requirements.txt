@@ -1,0 +1,23 @@
+# Velum ctest-stage test dependencies. Install into the repo venv before running
+# the ctest suite (see README "Verify"):
+#
+#     .venv/bin/pip install -r tests/requirements.txt
+#
+# torch / torchaudio use the CPU wheels and must stay consistent with
+# tools/requirements-convert.txt (torch==2.14.0+cpu). torchaudio is in
+# maintenance mode: its latest release is 2.11.0 — there is no 2.14.0 — so
+# 2.11.0+cpu is the matching pair for torch 2.14.0 (verified importable and
+# functional with torch 2.14.0).
+#
+# The reference/export scripts that also `import cosyvoice` are *not* covered
+# here — `cosyvoice` must come from a separate CosyVoice environment, not these
+# deps.
+
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
+torch==2.14.0+cpu
+torchaudio==2.11.0+cpu
+numpy==2.5.3
+hyperpyyaml==1.2.3
+openai-whisper==20250625

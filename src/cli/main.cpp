@@ -23,10 +23,10 @@ namespace {
 struct Args {
   std::string instruct = "You are a helpful assistant. 请用普通话表达。<|endofprompt|>";
   std::string text;
-  std::string prompt_dir;
-  std::string llm_gguf = "build/llm.gguf";
-  std::string flow_gguf = "build/flow.gguf";
-  std::string hift_gguf = "build/hift.gguf";
+  std::string prompt_dir = "build/prompt";
+  std::string llm_gguf = "models/llm.gguf";
+  std::string flow_gguf = "models/flow.gguf";
+  std::string hift_gguf = "models/hift.gguf";
   std::string hift_source = "build/hift_source.bin";
   std::string flow_noise = "build/flow_noise.bin";
   std::string tokenizer_dir = "build/tokenizer";
@@ -42,7 +42,7 @@ void usage(const char* argv0) {
     "usage: %s --text <str> --prompt-dir <dir> --out <wav> [options]\n"
     "\n"
     "  --text <str>         text to synthesize (required)\n"
-    "  --prompt-dir <dir>   pre-extracted prompt bundle (required):\n"
+    "  --prompt-dir <dir>   pre-extracted prompt bundle (default build/prompt):\n"
     "                         prompt_tokens.i32  (P int32 speech tokens)\n"
     "                         prompt_feat.f32    (mel_len1*80 matcha mel)\n"
     "                         spk_embedding.f32  (192 campplus embedding)\n"
@@ -50,7 +50,7 @@ void usage(const char* argv0) {
     "\n"
     "  --instruct <str>     LLM text prompt (must contain <|endofprompt|>)\n"
     "  --seed <n>           LLM sampling seed (default 0)\n"
-    "  --llm/--flow/--hift <gguf>         model files (default build/*.gguf)\n"
+    "  --llm/--flow/--hift <gguf>         model files (default models/*.gguf)\n"
     "  --hift-source <bin>  SineGen2 source asset (default build/hift_source.bin)\n"
     "  --flow-noise <bin>   CFM noise asset (default build/flow_noise.bin)\n"
     "  --tokenizer-dir <dir>              (default build/tokenizer)\n"
@@ -85,7 +85,7 @@ bool parse_args(int argc, char** argv, Args* a) {
     else if (k == "--dump-audio"){ v = need(i); if (!v) return false; a->dump_audio = v; }
     else return false;
   }
-  return !a->text.empty() && !a->prompt_dir.empty() && !a->out_wav.empty();
+  return !a->text.empty() && !a->out_wav.empty();
 }
 
 bool read_i32(const std::string& path, std::vector<int32_t>& out) {

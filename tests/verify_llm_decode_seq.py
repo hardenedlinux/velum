@@ -42,13 +42,13 @@ def load_raw(path, shape):
 def main():
     dump_bin = os.environ.get("VELUM_LLM_DECODE_SEQ_DUMP",
                               os.path.join(ROOT, "build", "velum_llm_decode_seq_dump"))
-    gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "build", "llm.gguf"))
+    gguf = os.environ.get("LLM_GGUF", os.path.join(ROOT, "models", "llm.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "llm_decode_seq_ref.npz")
 
     if not os.path.exists(dump_bin):
         sys.exit(f"velum_llm_decode_seq_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
-        sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir build/")
+        sys.exit(f"llm.gguf not found at {gguf}; run tools/convert_weights.py --llm llm.pt --out-dir models/")
     if not os.path.exists(ref_path):
         sys.exit(f"reference not found at {ref_path}; run tests/llm_decode_seq_reference.py first")
 

@@ -19,7 +19,7 @@ GGML's float32 kernels against PyTorch's own float32 kernels, so that part shows
 Usage:
     python3 tests/verify_hift.py            # uses build/velum_hift_dump
     VELUM_HIFT_DUMP=./build/velum_hift_dump python3 tests/verify_hift.py
-    HIFT_GGUF=./build/hift.gguf python3 tests/verify_hift.py
+    HIFT_GGUF=./models/hift.gguf python3 tests/verify_hift.py
 """
 
 import os
@@ -98,13 +98,13 @@ def compare(name, cpp, ref):
 
 def main():
     dump_bin = os.environ.get("VELUM_HIFT_DUMP", os.path.join(ROOT, "build", "velum_hift_dump"))
-    gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "build", "hift.gguf"))
+    gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "models", "hift.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hift_ref.npz")
 
     if not os.path.exists(dump_bin):
         sys.exit(f"velum_hift_dump not found at {dump_bin}; build it first (cmake --build build)")
     if not os.path.exists(gguf):
-        sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir build/")
+        sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir models/")
     if not os.path.exists(ref_path):
         sys.exit(f"reference not found at {ref_path}; run tests/hift_reference.py first")
 

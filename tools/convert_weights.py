@@ -28,7 +28,13 @@ import argparse
 import os
 import sys
 
-import torch
+try:
+    import torch
+except ImportError as exc:
+    sys.exit(
+        "convert_weights.py: PyTorch is required but not installed.\n"
+        "  python3 -m venv .venv && .venv/bin/pip install -r tools/requirements-convert.txt\n"
+        f"  ({exc})")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gguf  # noqa: E402
@@ -124,7 +130,7 @@ def merge_weight_norm(state_dict):
 
 def convert_one(checkpoint_path, arch, out_path, use_f16, strip_prefix):
     print(f"  {checkpoint_path} -> {out_path}")
-    obj = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    obj = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
     state_dict = merge_weight_norm(extract_state_dict(obj))
 
     tensors = []

@@ -61,14 +61,14 @@ def read_source_bin(path):
 def main():
     dump_bin = os.environ.get("VELUM_HIFT_SOURCE_DUMP",
                               os.path.join(ROOT, "build", "velum_hift_source_dump"))
-    gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "build", "hift.gguf"))
+    gguf = os.environ.get("HIFT_GGUF", os.path.join(ROOT, "models", "hift.gguf"))
     source_bin = os.environ.get("HIFT_SOURCE_BIN",
                                 os.path.join(ROOT, "build", "hift_source.bin"))
 
     if not os.path.exists(dump_bin):
         sys.exit(f"velum_hift_source_dump not found at {dump_bin}; build it first")
     if not os.path.exists(gguf):
-        sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir build/")
+        sys.exit(f"hift.gguf not found at {gguf}; run tools/convert_weights.py --hift hift.pt --out-dir models/")
     if not os.path.exists(source_bin):
         sys.exit(f"hift_source.bin not found at {source_bin}; run tests/export_hift_source.py first")
 

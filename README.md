@@ -55,6 +55,40 @@ their outputs as files instead of running them.
 Please read [Missing Features](docs/missing-features.md), these missings will not be added in the community edition, we offer consulting service for enterprise edition. 
 Please contact consulting@hardenedvault.com.
 
+## Quick start
+
+Everything from a fresh clone to a synthesized `.wav`. The only steps that touch
+the network or run Python are `pip install` and the `models` target; compiling
+`velum` itself is pure CMake/C++.
+
+```sh
+# clone (ggml is a git submodule — it must be initialized)
+git clone --recurse-submodules https://github.com/hardenedlinux/velum.git
+cd velum
+
+# 1. repo venv (torch/numpy) for the one-time weight conversion + RNG buffers
+python3 -m venv .venv
+.venv/bin/pip install -r tools/requirements-convert.txt
+
+# 2. configure + compile (CUDA auto-detected if a toolkit is present)
+cmake -S . -B build
+cmake --build build -j
+
+# 3. download & convert models + generate the fixed RNG buffers (~2.6 GB, one-time)
+cmake --build build --target models
+
+# 4. synthesize
+./build/velum --text "今天天气不错，我们一起去公园散步吧。" --out hello.wav
+```
+
+Prerequisites: `git`, CMake ≥ 3.16, a C++17 toolchain, ICU with development
+headers (e.g. `libicu-dev` on Debian/Ubuntu), and `python3` + `venv` (only for
+steps 1 and 3); a CUDA toolkit is optional. If you already cloned without
+submodules, run `git submodule update --init --recursive` before `cmake`.
+
+Each step is explained in detail below (`## Build`, `## Prepare models & assets`,
+`## Run`).
+
 ## Layout
 
 | dir | purpose |
@@ -66,8 +100,9 @@ Please contact consulting@hardenedvault.com.
 | `src/pipeline/` | orchestration: tokenizer → LLM → Flow → HiFT |
 | `src/cli/` | `velum` end-to-end entry point |
 | `src/frontend/` | reserved for the deferred ONNX frontend |
-| `tools/` | offline prep: `convert_weights.py`, `export_tokenizer.py`, `gguf.py`, `gen_mel_filters.py` |
+| `tools/` | offline prep: `fetch_model.py`, `convert_weights.py`, `gen_rng_buffers.py`, `export_tokenizer.py`, `gguf.py`, `gen_mel_filters.py` |
 | `tests/` | `verify_*.py` numerical checks + `export_*.py` / `extract_prompt_features.py` asset producers |
+| `data/` | committed runtime data: `tokenizer/` (BPE vocab + merges), `prompt/` (default prompt-voice bundle) |
 | `docs/` | `ARCHITECTURE.md`, ADRs, `DSP.md`, `FLOW.md`, `HIFT.md`, `LLM.md`, `WEIGHT_FORMAT.md` |
 
 ## Build
@@ -90,12 +125,70 @@ present and falls back to CPU. Force the CPU backend with `VELUM_BACKEND=cpu`
 
 ## Prepare models & assets (offline, one-time)
 
-Two Python environments are used:
+### Model weights & fixed buffers — the `models` target (recommended)
 
-- **`.venv`** — repo-local, `torch` + `numpy`, for weight conversion.
+The checkpoints are fetched and converted, and the fixed RNG buffers are
+generated, all from one opt-in build target. This is the *only* step that
+touches the network or runs Python; the default `cmake --build build` does
+neither.
+
+```sh
+cmake --build build --target models
+```
+
+This (1) downloads `llm.pt` / `flow.pt` / `hift.pt` from the pinned Hugging Face
+revision `FunAudioLLM/Fun-CosyVoice3-0.5B-2512@29e01c4e` (falling back to the
+ModelScope mirror) and verifies each against a hardcoded SHA-256, (2) converts
+them to `models/llm.gguf` / `models/flow.gguf` / `models/hift.gguf`, and (3)
+generates the fixed RNG buffers `build/hift_source.bin` /
+`build/flow_noise.bin` (see below). Downloads resume on interruption and
+already-correct files are skipped, so re-running the target is a no-op.
+Conversion and buffer generation need PyTorch — install it once:
+
+```sh
+python3 -m venv .venv && .venv/bin/pip install -r tools/requirements-convert.txt
+```
+
+(make sure `python3` resolves to that environment when you configure). See
+`tools/fetch_model.py` for the weight license status (HF tag `apache-2.0` vs the
+model card's "for academic purposes only" note).
+
+The full one-command prepare is:
+
+```sh
+cmake --build build && cmake --build build --target models
+```
+
+### Fixed RNG buffers (generated, not committed)
+
+Two model-internal buffers are sampled from PyTorch's RNG at construction time
+in the reference; the C++ side loads them verbatim (`FlowDecoder::load_noise` /
+`HiftVocoder::load_source`) instead of reimplementing PyTorch's RNG:
+
+- `build/flow_noise.bin` — the Flow decoder's CFM seed noise
+  `torch.randn([1,80,50*300])` drawn once under `set_all_random_seed(0)`.
+- `build/hift_source.bin` — the HiFT `SineGen2` fixed source (`rand_ini` +
+  `sine_waves`, `torch.rand`, full 300 s bank).
+
+Neither depends on the weights or on the CosyVoice package, so
+`tools/gen_rng_buffers.py` (run by the `models` target) reproduces them with a
+bare `torch.manual_seed(0)`: the flow noise is bit-exact, and the HiFT values
+are arbitrary noise/phases where *consuming the same bytes* — not matching
+CosyVoice's RNG — is what correctness requires (the `verify_e2e.py` reference
+overrides its own buffers with this file). They are therefore generated at build
+time rather than committed (the HiFT bank is ~247 MiB).
+
+### The manual / offline path
+
+If you already have the checkpoints locally (e.g. a CosyVoice checkout), skip the
+download and convert them directly. Two Python environments are used:
+
+- **`.venv`** — repo-local, `torch` + `numpy`, for weight conversion and RNG
+  buffer generation.
 - **CosyVoice python3.10** — the reference environment that can import
-  `cosyvoice`/`transformers`, for asset/prompt extraction (the tokenizer data
-  is now committed; see step 2).
+  `cosyvoice`/`transformers`, only for regenerating the committed data
+  (tokenizer + prompt-voice bundle) from a model checkout; not needed for
+  normal builds.
 
 ```sh
 # paths used below
@@ -109,10 +202,10 @@ PYTHONPATH="$HOME/Project/CosyVoice/.local/lib/python3.10/site-packages"
 ```sh
 .venv/bin/python tools/convert_weights.py \
   --llm "$MODEL/llm.pt" --flow "$MODEL/flow.pt" --hift "$MODEL/hift.pt" \
-  --out-dir build/
+  --out-dir models/
 ```
 
-writes `build/llm.gguf` / `build/flow.gguf` / `build/hift.gguf` (format-only
+writes `models/llm.gguf` / `models/flow.gguf` / `models/hift.gguf` (format-only
 conversion, no quantization). Use `--llm "$MODEL/llm.rl.pt"` for the RL-tuned
 checkpoint.
 
@@ -128,49 +221,57 @@ bumping the CosyVoice version), run the standard-library-only script:
 python3 tools/export_tokenizer.py --out-dir data/tokenizer
 ```
 
-**3. Export the fixed RNG buffers** (python3.10):
+**3. Generate the fixed RNG buffers** (`.venv`, no CosyVoice needed):
 
 ```sh
-"$PY310" tests/export_hift_source.py    # -> build/hift_source.bin  (HiFT SineGen2 rand_ini + sine_waves)
-"$PY310" tests/export_flow_noise.py     # -> build/flow_noise.bin   (Flow CFM seed noise)
+.venv/bin/python tools/gen_rng_buffers.py --out-dir build/
 ```
 
-These are the model-internal buffers the reference samples once from PyTorch's
-RNG at construction; the C++ side loads the frozen values instead of
-reimplementing the RNG.
+writes `build/hift_source.bin` (HiFT SineGen2 rand_ini + sine_waves) and
+`build/flow_noise.bin` (Flow CFM seed noise). These are the model-internal
+buffers the reference samples once from PyTorch's RNG at construction; the C++
+side loads the frozen values instead of reimplementing the RNG. They do not
+depend on the weights and need only torch/numpy, so `tools/gen_rng_buffers.py`
+runs without CosyVoice (the `models` target runs it for you). The CosyVoice-env
+exporters `tests/export_hift_source.py` / `tests/export_flow_noise.py` remain as
+the reference/provenance scripts.
 
-**4. Extract the prompt-voice bundle** (python3.10):
+**4. Prompt-voice bundle** (committed — no Python needed):
+
+`prompt_tokens.i32` / `prompt_feat.f32` / `spk_embedding.f32` — the default
+zero-shot prompt voice (`asset/zero_shot_prompt.wav`) — are committed under
+`data/prompt/` (see `data/prompt/README.md` for provenance and licensing). The
+build copies them into `build/prompt/` automatically, so this step is a no-op
+for normal builds. To extract a *different* prompt voice (the deferred ONNX
+frontend — campplus + speech tokenizer + matcha mel — "temporarily handed to
+Python"), run under the CosyVoice python3.10 env:
 
 ```sh
-"$PY310" tests/extract_prompt_features.py --out-dir wavs/flow_inputs
+"$PY310" tests/extract_prompt_features.py --out-dir data/prompt --prompt-wav <wav>
 ```
-
-runs campplus + speech tokenizer + matcha mel on the prompt wav and writes
-`prompt_tokens.i32` / `prompt_feat.f32` / `spk_embedding.f32` (the deferred
-frontend, "temporarily handed to Python"). Pass `--prompt-wav <wav>` to use a
-different voice.
 
 ## Run
 
 ```sh
 ./build/velum \
   --text "今天天气不错，我们一起去公园散步吧。" \
-  --prompt-dir wavs/flow_inputs \
-  --out wavs/hello.wav
+  --out hello.wav
 ```
 
-Model/asset paths default to `build/llm.gguf`, `build/flow.gguf`,
-`build/hift.gguf`, `build/hift_source.bin`, `build/flow_noise.bin` and
-`build/tokenizer`. `--text` is required; `--instruct` defaults to
+Model/asset paths default to `models/llm.gguf`, `models/flow.gguf`,
+`models/hift.gguf` (the `models` target), `build/hift_source.bin`,
+`build/flow_noise.bin`, `build/tokenizer` and `build/prompt` (the committed
+default prompt voice, so `--prompt-dir` is optional — pass it to use a different
+voice). `--text` is required; `--instruct` defaults to
 `"You are a helpful assistant. 请用普通话表达。<|endofprompt|>"` and must contain
 `<|endofprompt|>`. Optional dumps:
 
 ```sh
-./build/velum --text ... --prompt-dir wavs/flow_inputs --out wavs/hello.wav \
+./build/velum --text ... --out hello.wav \
   --seed 0 \
-  --dump-tokens wavs/hello.tokens.i32 \
-  --dump-mel    wavs/hello.mel.f32 \
-  --dump-audio  wavs/hello.audio.f32
+  --dump-tokens hello.tokens.i32 \
+  --dump-mel    hello.mel.f32 \
+  --dump-audio  hello.audio.f32
 ```
 
 `--seed` drives the LLM sampling RNG; the speech-token sequence is stochastic,
@@ -179,7 +280,11 @@ forces CPU.
 
 ## Verify
 
+The `ctest` suite's numerical checks are Python scripts that need the test
+dependencies (numpy / torch / torchaudio / whisper / hyperpyyaml) in `.venv`:
+
 ```sh
+.venv/bin/pip install -r tests/requirements.txt
 ctest --test-dir build            # DSP / flow / hift / tokenizer / llm numerical checks
 "$PY310" tests/verify_e2e.py      # end-to-end CLI vs PyTorch (CPU, slower)
 ```
@@ -235,11 +340,11 @@ The Flow decoder's CFM noise is **fixed at seed 0 by design**. The reference
 `CausalConditionalCFM.__init__` samples `rand_noise = torch.randn([1,80,50*300])`
 once, under `set_all_random_seed(0)`, and every inference slices
 `z = rand_noise[:,:,:n]` from that single frozen buffer. The C++ decoder loads
-that exact buffer from `build/flow_noise.bin` (exported by
-`tests/export_flow_noise.py`) and reuses it for **every** synthesis — this is a
-deliberate, permanent design choice that keeps the decoder deterministic and
-reproducible, **not** a configurable option and **not** a per-run RNG. There is
-no seed flag for it (see `docs/FLOW.md`).
+that exact buffer from `build/flow_noise.bin` (generated by
+`tools/gen_rng_buffers.py`, bit-exact with seed-0 `torch.randn`) and reuses it
+for **every** synthesis — this is a deliberate, permanent design choice that
+keeps the decoder deterministic and reproducible, **not** a configurable option
+and **not** a per-run RNG. There is no seed flag for it (see `docs/FLOW.md`).
 
 ## Docs
 

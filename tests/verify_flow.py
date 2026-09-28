@@ -19,7 +19,7 @@ DSP frontend).
 Usage:
     python3 tests/verify_flow.py            # uses build/velum_flow_dump
     VELUM_FLOW_DUMP=./build/velum_flow_dump python3 tests/verify_flow.py
-    FLOW_GGUF=./build/flow.gguf python3 tests/verify_flow.py
+    FLOW_GGUF=./models/flow.gguf python3 tests/verify_flow.py
 """
 
 import os
@@ -71,13 +71,13 @@ def compare(name, cpp, ref):
 
 def main():
     dump_bin = os.environ.get("VELUM_FLOW_DUMP", os.path.join(ROOT, "build", "velum_flow_dump"))
-    gguf = os.environ.get("FLOW_GGUF", os.path.join(ROOT, "build", "flow.gguf"))
+    gguf = os.environ.get("FLOW_GGUF", os.path.join(ROOT, "models", "flow.gguf"))
     ref_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flow_ref.npz")
 
     if not os.path.exists(dump_bin):
         sys.exit(f"velum_flow_dump not found at {dump_bin}; build it first (cmake --build build)")
     if not os.path.exists(gguf):
-        sys.exit(f"flow.gguf not found at {gguf}; run tools/convert_weights.py --flow flow.pt --out-dir build/")
+        sys.exit(f"flow.gguf not found at {gguf}; run tools/convert_weights.py --flow flow.pt --out-dir models/")
     if not os.path.exists(ref_path):
         sys.exit(f"reference not found at {ref_path}; run tests/flow_reference.py first")
 

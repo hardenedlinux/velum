@@ -46,8 +46,16 @@ tests/tokenizer_cases.bin
 *.pth
 *.gguf
 
+# model checkpoints + converted GGUF (downloaded by `cmake --build build --target models`)
+/models/
+
+# local CosyVoice model checkout (weights + ONNX frontend, ~GBs; never commit)
+/pretrained_models/
+
 # editor / OS
 .vscode/
 .idea/
 *.swp
 .DS_Store
+
+*.wav

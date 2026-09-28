@@ -30,7 +30,7 @@ decoder is invoked, and its ``feat.f32`` mel is fed through ``model.hift``.
 Usage (from anywhere):
     PYTHONPATH=... python3 tests/acceptance_wavs.py \
         --model-dir ~/Project/CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B \
-        --flow-gguf build/flow.gguf --flow-dump build/velum_flow_dump \
+        --flow-gguf models/flow.gguf --flow-dump build/velum_flow_dump \
         --out-dir wavs
 
 All CosyVoice paths default to the repo layout under ``~/Project/CosyVoice``.
@@ -59,9 +59,9 @@ def _bootstrap(args):
 def main():
     ap = argparse.ArgumentParser(description="Generate wav_ggml.wav and wav_reference.wav from one real token stream.")
     ap.add_argument("--model-dir", default=os.path.join(COSYVOICE_DIR, "pretrained_models", "Fun-CosyVoice3-0.5B"))
-    ap.add_argument("--flow-gguf", default=os.path.join(ROOT, "build", "flow.gguf"))
+    ap.add_argument("--flow-gguf", default=os.path.join(ROOT, "models", "flow.gguf"))
     ap.add_argument("--flow-dump", default=os.path.join(ROOT, "build", "velum_flow_dump"))
-    ap.add_argument("--hift-gguf", default=os.path.join(ROOT, "build", "hift.gguf"))
+    ap.add_argument("--hift-gguf", default=os.path.join(ROOT, "models", "hift.gguf"))
     ap.add_argument("--hift-dump", default=os.path.join(ROOT, "build", "velum_hift_dump"))
     ap.add_argument("--prompt-wav", default=os.path.join(COSYVOICE_DIR, "asset", "zero_shot_prompt.wav"))
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "wavs"))

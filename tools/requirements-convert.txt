@@ -1,0 +1,9 @@
+# Pinned environment for tools/convert_weights.py (weight conversion only).
+# Install into a venv:  python3 -m venv .venv && .venv/bin/pip install -r tools/requirements-convert.txt
+#
+# CPU-only PyTorch is enough — the converter only loads state_dicts and copies
+# tensor bytes; it never trains or runs on a GPU. The +cpu wheel resolves from
+# the PyTorch CPU index below; numpy resolves from PyPI.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu
+numpy==2.5.3

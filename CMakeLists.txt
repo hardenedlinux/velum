@@ -190,6 +190,110 @@ add_custom_command(
 add_custom_target(velum_tokenizer_data DEPENDS ${VELUM_TOKENIZER_DATA_OUT})
 add_dependencies(velum velum_tokenizer_data)
 
+# --- Committed prompt-voice bundle -> build tree ------------------------------
+# The default zero-shot prompt voice (CosyVoice3's asset/zero_shot_prompt.wav)
+# is pre-extracted into three fixed tensors committed under data/prompt/ (see
+# its README for provenance and licensing). Copy them into build/prompt/ so
+# `velum`'s default --prompt-dir works without running the deferred ONNX
+# frontend (campplus / speech tokenizer / matcha mel).
+set(VELUM_PROMPT_DATA_OUT
+  ${CMAKE_CURRENT_BINARY_DIR}/prompt/prompt_tokens.i32
+  ${CMAKE_CURRENT_BINARY_DIR}/prompt/prompt_feat.f32
+  ${CMAKE_CURRENT_BINARY_DIR}/prompt/spk_embedding.f32)
+
+add_custom_command(
+  OUTPUT ${VELUM_PROMPT_DATA_OUT}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/prompt
+  COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/prompt_tokens.i32
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/prompt_feat.f32
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/spk_embedding.f32
+          ${CMAKE_CURRENT_BINARY_DIR}/prompt
+  DEPENDS
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/prompt_tokens.i32
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/prompt_feat.f32
+          ${CMAKE_CURRENT_SOURCE_DIR}/data/prompt/spk_embedding.f32
+  COMMENT "Copying committed prompt-voice bundle into build/prompt")
+
+add_custom_target(velum_prompt_data DEPENDS ${VELUM_PROMPT_DATA_OUT})
+add_dependencies(velum velum_prompt_data)
+
+# --- models target (opt-in weight download + conversion + RNG buffers) -------
+# NOT part of the default build: `cmake --build build` does no networking and
+# invokes no Python. Building `models` explicitly (1) downloads the three
+# checkpoints via tools/fetch_model.py (stdlib only, sha256-pinned, resume),
+# (2) converts them to GGUF via tools/convert_weights.py (needs torch, installed
+# from tools/requirements-convert.txt), and (3) generates the fixed RNG buffers
+# (build/hift_source.bin, build/flow_noise.bin) via tools/gen_rng_buffers.py —
+# these are model-internal buffers the reference samples from PyTorch's RNG at
+# construction; the C++ side loads them verbatim, and neither needs CosyVoice.
+# All steps are OUTPUT/DEPENDS driven, so a re-run does nothing that is already
+# present and hash-correct.
+#
+# find_program only *locates* python3 (no interpreter is run at configure time),
+# so the default configure/build stays Python-free; the torch check happens in
+# convert_weights.py, which prints the install command when it is missing.
+find_program(VELUM_PYTHON3 python3)
+# Prefer the repo's own .venv (torch installed there via
+# tools/requirements-convert.txt) so `--target models` works without the user
+# having to activate it first; fall back to whatever `python3` is on PATH.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.venv/bin/python")
+  set(VELUM_PYTHON3 "${CMAKE_CURRENT_SOURCE_DIR}/.venv/bin/python")
+endif()
+
+set(VELUM_MODELS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/models")
+set(VELUM_MODEL_SOURCES
+  ${VELUM_MODELS_DIR}/llm.pt
+  ${VELUM_MODELS_DIR}/flow.pt
+  ${VELUM_MODELS_DIR}/hift.pt)
+set(VELUM_MODEL_OUTS
+  ${VELUM_MODELS_DIR}/llm.gguf
+  ${VELUM_MODELS_DIR}/flow.gguf
+  ${VELUM_MODELS_DIR}/hift.gguf)
+
+# Fixed RNG buffers (build/hift_source.bin, build/flow_noise.bin). They do not
+# depend on the weights (pure RNG), so this command's DEPENDS is only the
+# generator script; the `models` target runs it alongside fetch/convert.
+set(VELUM_RNG_OUTS
+  ${CMAKE_CURRENT_BINARY_DIR}/hift_source.bin
+  ${CMAKE_CURRENT_BINARY_DIR}/flow_noise.bin)
+
+if(VELUM_PYTHON3)
+  add_custom_command(
+    OUTPUT ${VELUM_MODEL_SOURCES}
+    COMMAND ${VELUM_PYTHON3} -u ${CMAKE_CURRENT_SOURCE_DIR}/tools/fetch_model.py
+            --out-dir ${VELUM_MODELS_DIR}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tools/fetch_model.py
+    COMMENT "Downloading CosyVoice3 checkpoints into models/")
+
+  add_custom_command(
+    OUTPUT ${VELUM_MODEL_OUTS}
+    COMMAND ${VELUM_PYTHON3} -u ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_weights.py
+            --llm ${VELUM_MODELS_DIR}/llm.pt
+            --flow ${VELUM_MODELS_DIR}/flow.pt
+            --hift ${VELUM_MODELS_DIR}/hift.pt
+            --out-dir ${VELUM_MODELS_DIR}
+    DEPENDS ${VELUM_MODEL_SOURCES}
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools/convert_weights.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/tools/gguf.py
+    COMMENT "Converting CosyVoice3 checkpoints to GGUF (models/)")
+
+  add_custom_command(
+    OUTPUT ${VELUM_RNG_OUTS}
+    COMMAND ${VELUM_PYTHON3} -u ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_rng_buffers.py
+            --out-dir ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_rng_buffers.py
+    COMMENT "Generating fixed RNG buffers (build/hift_source.bin, build/flow_noise.bin)")
+
+  add_custom_target(models DEPENDS ${VELUM_MODEL_OUTS} ${VELUM_RNG_OUTS})
+else()
+  add_custom_target(models
+    COMMAND ${CMAKE_COMMAND} -E echo
+            "error: the 'models' target needs a python3 interpreter on PATH, but none was found"
+    COMMAND ${CMAKE_COMMAND} -E false
+    VERBATIM)
+endif()
+
 # Test utility used by tests/verify_dsp.py for the numerical comparison.
 add_executable(velum_dump tests/dump_features.cpp)
 target_link_libraries(velum_dump PRIVATE velum_dsp)
